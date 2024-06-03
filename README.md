@@ -1,12 +1,13 @@
 # qrspy (Qlik Sense Repository Python)
 Python wrapper for Qlik Sense Repository Service.
 
+Forked from [clintcarr/qrspy](https://github.com/clintcarr/qrspy)
+
 # Instructions
-1. ensure requests is installed (pip install requests)
-2. ensure requests_ntlm is installed (pip install requests_ntlm)
-3. export the qlik sense certificates in PEM format to a local folder
-4. launch python
-5. import qrspy
+1. install package (pip install qrspy)
+2. export the qlik sense certificates in PEM format to a local folder
+3. launch python
+4. import qrspy
 
 # Documentation
 Please browse for full documentation https://clintcarr.github.io/qrspy/
