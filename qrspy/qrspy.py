@@ -1154,18 +1154,3 @@ class ConnectQlik:
         app_data[0]['owner'] = user
         jdata = json.dumps(app_data[0])
         return self.put(path, jdata)
-
-
-
-if __name__ == '__main__':
-    qrs = ConnectQlik(server='qs2.qliklocal.net:4242', 
-                    certificate=('C:/certs/qs2.qliklocal.net/client.pem',
-                                      'C:/certs/qs2.qliklocal.net/client_key.pem'),
-                    root='C:/certs/qs2.qliklocal.net/root.pem',
-                    userdirectory='qliklocal',
-                    userid='administrator')
-
-    qrsntlm = ConnectQlik(server='qs2.qliklocal.net', 
-                    credential='qliklocal\\administrator',
-                    password='Qlik1234')
-    print (qrs.update_appowner('newapp1', 'mila'))
