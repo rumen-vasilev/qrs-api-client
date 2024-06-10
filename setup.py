@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='qrspy',
+    name='qrs',
     version='1.0.0',
     packages=find_packages(),
-    url='https://github.com/rumen-vasilev/qrspy',
+    url='https://github.com/rumen-vasilev/qrs-api-client',
     license='Apache 2.0',
     author='Rumen Vasilev',
     author_email='rumen.vasilev@gmail.com',

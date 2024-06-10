@@ -1,13 +1,13 @@
-# qrspy (Qlik Sense Repository Python)
+# qrs-api-client (Qlik Sense Repository API Client)
 Python wrapper for Qlik Sense Repository Service.
 
 Forked from [clintcarr/qrspy](https://github.com/clintcarr/qrspy)
 
 # Instructions
-1. install package (pip install qrspy)
+1. install package (pip install qrs-api-client)
 2. export the qlik sense certificates in PEM format to a local folder
 3. launch python
-4. import qrspy
+4. import qrs
 
 # Documentation
 Please browse for full documentation https://clintcarr.github.io/qrspy/
@@ -25,17 +25,17 @@ Please browse for full documentation https://clintcarr.github.io/qrspy/
 
 ### Linux
 ```
-qrs = qrspy.ConnectQlik(server='qs2.qliklocal.net:4242', certificate=('/home/user/Documents/certs/qs2/client.pem', '/home/user/Documents/certs/qs2/client_key.pem'), root='/home/user/Documents/certs/qs2/root.pem')
+qrs = qrs.ConnectQlik(server='qs2.qliklocal.net:4242', certificate=('/home/user/Documents/certs/qs2/client.pem', '/home/user/Documents/certs/qs2/client_key.pem'), root='/home/user/Documents/certs/qs2/root.pem')
 ```
 ### Windows authenticate with certificates
 ```
-qrs = qrspy.ConnectQlik(server = 'qs2.qliklocal.net:4242', 
+qrs = qrs.ConnectQlik(server = 'qs2.qliklocal.net:4242', 
                         certificate = ('c:/certs/qs2/client.pem', 'c:/certs/qs2/client_key.pem'), 
                         root = 'c:/certs/qs2/root.pem')
 ```
 ### Windows authenticate with Windows Authentication (NTLM)
 ```
-qrs = qrspy.ConnectQlik(server = 'qs2.qliklocal.net:4242', 
+qrs = qrs.ConnectQlik(server = 'qs2.qliklocal.net:4242', 
                         credential = 'qliklocal\\administrator', 
                         password = 'Qlik1234')
 ```
