@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='qrs',
+    name='qrs-api-client',
     version='1.0.0',
     packages=find_packages(),
     url='https://github.com/rumen-vasilev/qrs-api-client',
