@@ -129,7 +129,7 @@ class ConnectQlik:
                 
                 return response.content
         else:
-            if filtervalue in [True, False]:
+            if filtervalue in [True, False] or uuid.UUID(filtervalue):
                 response = session.get("https://{0}/{1}?filter={2} {3}&xrfkey={4}".format 
                                         (self.server, endpoint, filterparam, filtervalue, xrf), 
                                         headers=headers, verify=self.root, cert=self.certificate)
@@ -335,6 +335,18 @@ class ConnectQlik:
         :returns: JSON
         """
         path = 'qrs/task'
+        if opt:
+            path += '/full'
+        return json.loads(self.get(path, filterparam, filtervalue).decode('utf-8'))
+
+    def get_reloadtask(self, opt=None, filterparam=None, filtervalue=None):
+        """
+        Returns the reload tasks
+        :param filterparam: Property and operator of the filter
+        :param filtervalue: Value of the filter
+        :returns: JSON
+        """
+        path = 'qrs/reloadtask'
         if opt:
             path += '/full'
         return json.loads(self.get(path, filterparam, filtervalue).decode('utf-8'))
