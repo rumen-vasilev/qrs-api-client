@@ -10,18 +10,20 @@ import uuid
 
 requests.packages.urllib3.disable_warnings()
 
+
 def set_xrf():
     characters = string.ascii_letters + string.digits
     return ''.join(random.sample(characters, 16))
 
+
 xrf = set_xrf()
 
-headers = {"X-Qlik-XrfKey": xrf,
-           "Accept": "application/json",
+headers = {"X-Qlik-XrfKey": xrf, "Accept": "application/json",
            "X-Qlik-User": "UserDirectory=Internal;UserID=sa_repository",
            "Content-Type": "application/json"}
 
 session = requests.session()
+
 
 class ConnectQlik:
     """
@@ -347,6 +349,18 @@ class ConnectQlik:
         :returns: JSON
         """
         path = 'qrs/reloadtask'
+        if opt:
+            path += '/full'
+        return json.loads(self.get(path, filterparam, filtervalue).decode('utf-8'))
+
+    def get_event(self, opt=None, filterparam=None, filtervalue=None):
+        """
+        Returns the triggers of tasks
+        :param filterparam: Property and operator of the filter
+        :param filtervalue: Value of the filter
+        :returns: JSON
+        """
+        path = 'qrs/event'
         if opt:
             path += '/full'
         return json.loads(self.get(path, filterparam, filtervalue).decode('utf-8'))
