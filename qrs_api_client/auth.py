@@ -3,19 +3,21 @@ import requests
 
 
 class AuthManager:
-    def __init__(self, cert_path=None, key_path=None, root_cert_path=None, ntlm_credentials=None):
+    def __init__(self, cert_path=None, key_path=None, root_cert_path=None, user_id=None, password=None):
         """
         Initialisiert den AuthManager mit optionalen Parametern für verschiedene Authentifizierungsmethoden.
 
         :param cert_path: Pfad zur Zertifikatsdatei (.pem)
         :param key_path: Pfad zur Schlüsseldatei (.key)
         :param root_cert_path: Pfad zur Root-Zertifikatsdatei (root.pem)
-        :param ntlm_credentials: Dictionary mit NTLM-Anmeldeinformationen ('username', 'password')
+        :param user_id: User ID
+        :param password: password
         """
         self.cert_path = cert_path
         self.key_path = key_path
         self.root_cert_path = root_cert_path
-        self.ntlm_credentials = ntlm_credentials
+        self.user_id = user_id
+        self.password = password
 
     def get_certificate_auth(self):
         """
@@ -24,25 +26,19 @@ class AuthManager:
         :return: Tuple (cert_path, key_path)
         """
         if not self.cert_path or not self.key_path:
-            raise ValueError("Für die Zertifikatsauthentifizierung müssen cert_path und key_path angegeben werden.")
+            raise ValueError("Please insert cert_path and key_path for certificate authentication.")
         return self.cert_path, self.key_path
 
     def get_ntlm_auth(self):
         """
-        Erstellt eine NTLM-Authentifizierung.
+        Creates a NTLM authentication.
 
         :return: requests_ntlm.HttpNtlmAuth-Objekt
         """
-        if not self.ntlm_credentials:
-            raise ValueError("Für NTLM-Authentifizierung müssen ntlm_credentials (username und password) angegeben werden.")
+        if not self.user_id or not self.password:
+            raise ValueError("Please insert user id and password for NTLM authentication")
 
-        username = self.ntlm_credentials.get("username")
-        password = self.ntlm_credentials.get("password")
-
-        if not username or not password:
-            raise ValueError("NTLM-Anmeldedaten müssen username und password enthalten.")
-
-        return HttpNtlmAuth(username, password)
+        return HttpNtlmAuth(self.user_id, self.password)
 
     def get_auth(self, session: requests.Session, auth_method="certificate", verify_ssl=True):
         """
@@ -58,12 +54,12 @@ class AuthManager:
         elif auth_method == "ntlm":
             session.auth = self.get_ntlm_auth()
         else:
-            raise ValueError(f"Unbekannte Authentifizierungsmethode: {auth_method}")
+            raise ValueError(f"Unknown authentication method: {auth_method}")
 
         # SSL-Root-Zertifikatsüberprüfung hinzufügen, falls angegeben
-        if self.root_cert_path:
+        if self.root_cert_path and verify_ssl:
             session.verify = self.root_cert_path
         else:
-            session.verify = verify_ssl  # Standardmäßig SSL-Verifizierung aktivieren
+            session.verify = verify_ssl
 
         return session

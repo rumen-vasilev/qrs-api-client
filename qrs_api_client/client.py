@@ -2,9 +2,7 @@ import requests
 import random
 import string
 from qrs_api_client.auth import AuthManager
-
-
-# session = requests.session()
+from qrs_api_client.endpoints import Endpoints
 
 
 class QRSClient:
@@ -12,8 +10,7 @@ class QRSClient:
     Instantiates the Qlik Repository Service Class
     """
 
-    def __init__(self, server_name: str, server_port: int, auth_manager: AuthManager, auth_method: str, verify_ssl=True,
-                 user_directory=False, user_id=False):
+    def __init__(self, server_name: str, server_port: int, auth_manager: AuthManager, auth_method: str, verify_ssl=True):
         """
         Establishes connectivity with Qlik Sense Repository Service
 
@@ -22,15 +19,13 @@ class QRSClient:
         :param auth_manager: server authentication
         :param auth_method: authentication method
         :param verify_ssl: Bool oder Pfad zur root.pem für SSL-Verifizierung
-        :param user_directory: user_directory to use for queries
-        :param user_id: user to use for queries
         """
 
         self.xrf = ''.join(random.sample(string.ascii_letters + string.digits, 16))
 
         self.server = server_name + ":" + str(server_port) + "/qrs"
         self.headers = {"X-Qlik-XrfKey": self.xrf, "Accept": "application/json",
-                        "X-Qlik-User": "UserDirectory={0};UserID={1}".format(user_directory, user_id),
+                        "X-Qlik-User": "UserDirectory=INTERNAL;UserID=sa_repository",
                         "Content-Type": "application/json"}
 
         # Authentifizierungsmanager initialisieren
@@ -55,23 +50,19 @@ class QRSClient:
         print(f"Making request to: {url}")
 
         try:
-            response = self.session.request(
-                method,
-                url,
-                headers=self.headers,
-                **kwargs
-            )
+            response = self.session.request(method, url, headers=self.headers, **kwargs)
+            print(response)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"Fehler bei API-Anfrage: {e}")
+            print(f"API request error: {e}")
             return None
 
     def get(self, endpoint, params=None):
         return self._request("GET", endpoint, params=params)
 
     def post(self, endpoint, data=None):
-        return self._request("POST", endpoint, json=data)
+        return self._request("POST", endpoint, data=data)
 
     def delete(self, endpoint):
         return self._request("DELETE", endpoint)
