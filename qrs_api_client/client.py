@@ -2,7 +2,8 @@ import requests
 import random
 import string
 from qrs_api_client.auth import AuthManager
-from qrs_api_client.endpoints import Endpoints
+import qrs_api_client.models as models
+import json
 
 
 class QRSClient:
@@ -30,7 +31,6 @@ class QRSClient:
 
         # Authentifizierungsmanager initialisieren
         self.session = requests.session()  # Initialisiere Session
-        self.auth_manager = auth_manager
         self.session = auth_manager.get_auth(self.session, auth_method, verify_ssl)
 
         if auth_method == "ntlm":
@@ -51,7 +51,6 @@ class QRSClient:
 
         try:
             response = self.session.request(method, url, headers=self.headers, **kwargs)
-            print(response)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -66,3 +65,36 @@ class QRSClient:
 
     def delete(self, endpoint):
         return self._request("DELETE", endpoint)
+
+    def create_reload_task(self, app_id, task_name, custom_properties, tags, schema_events, composite_events):
+        """Gibt den Endpunkt für eine benutzerdefinierte Eigenschaft nach Namen zurück."""
+        # App, which gets the task
+        app_condensed = models.app_condensed(_id=app_id)
+
+        # Custom properties
+        custom_property_list = []
+        for custom_property_id, custom_property_values in custom_properties.items():
+            custom_property_definition_condensed = models.custom_property_definition_condensed(_id=custom_property_id)
+            for value in custom_property_values:
+                custom_property_value = models.custom_property_value(value=value,
+                                                                     definition=custom_property_definition_condensed)
+                custom_property_list.append(custom_property_value)
+
+        # Tags
+        tag_list = []
+        for tag in tags:
+            tag_condensed = models.tag_condensed(_id=tag)
+            tag_list.append(tag_condensed)
+
+        # Reload task structure without scheduler
+        reload_task = models.reload_task(custom_properties=custom_property_list, name=task_name, tags=tag_list,
+                                         app=app_condensed)
+
+        # Reload task structure with scheduler
+        reload_task_bundle = models.reload_task_bundle(task=reload_task, composite_events=composite_events,
+                                                       schema_events=schema_events)
+
+        # Body of the HTTP method
+        payload = json.dumps(reload_task_bundle)
+
+        return self.post("reloadtask/create", data=payload)
