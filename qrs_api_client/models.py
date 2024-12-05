@@ -22,9 +22,9 @@ def reload_task_bundle(schema_path: str = None, task=None, composite_events: lis
     return _reload_task_bundle
 
 
-def reload_task_condensed(_id=None, privileges: list = None, name: str = None, task_type: int = None, enabled: bool = None,
-                          task_session_timeout: int = None, max_retries: int = None, operational=None,
-                          time_to_live: int = None):
+def reload_task_condensed(_id=None, privileges: list = None, name: str = None, task_type: int = None,
+                          enabled: bool = None, task_session_timeout: int = None, max_retries: int = None,
+                          operational=None, time_to_live: int = None):
 
     _reload_task_condensed = {}
 
@@ -170,8 +170,8 @@ def app_condensed(_id=None, privileges: list = None, name: str = None, app_id: s
     return _app_condensed
 
 
-def schema_event_condensed(_id=None, privileges: list = None, name: str = None, enabled: bool = None, event_type: int = None,
-                           operational=None):
+def schema_event_condensed(_id=None, privileges: list = None, name: str = None, enabled: bool = None,
+                           event_type: int = None, operational=None):
     _schema_event_condensed = {}
 
     if _id is not None:
@@ -198,10 +198,10 @@ def schema_event_condensed(_id=None, privileges: list = None, name: str = None, 
 
 
 def schema_event(_id=None, created_date=None, modified_date=None, modified_by_user_name: str = None,
-                 schema_path: str = None, privileges: list = None, name: str = None, enabled: bool = None, event_type: int = None,
-                 _reload_task=None, user_sync_task=None, external_program_task=None, time_zone: str = None,
-                 daylight_saving_time: int = None, start_date: datetime = None, expiration_date=None,
-                 schema_filter_description: list = None, increment_description: str = None,
+                 schema_path: str = None, privileges: list = None, name: str = None, enabled: bool = None,
+                 event_type: int = None, _reload_task=None, user_sync_task=None, external_program_task=None,
+                 time_zone: str = None, daylight_saving_time: int = None, start_date: datetime = None,
+                 expiration_date=None, schema_filter_description: list = None, increment_description: str = None,
                  increment_option: int = None, operational=None):
     _schema_event = {}
 

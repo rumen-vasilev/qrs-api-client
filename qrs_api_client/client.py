@@ -66,25 +66,28 @@ class QRSClient:
     def delete(self, endpoint):
         return self._request("DELETE", endpoint)
 
-    def create_reload_task(self, app_id, task_name, custom_properties, tags, schema_events, composite_events):
+    def create_reload_task(self, app_id, task_name, custom_properties=None, tags: list = None, schema_events: list = None,
+                           composite_events: list = None):
         """Gibt den Endpunkt für eine benutzerdefinierte Eigenschaft nach Namen zurück."""
         # App, which gets the task
         app_condensed = models.app_condensed(_id=app_id)
 
         # Custom properties
         custom_property_list = []
-        for custom_property_id, custom_property_values in custom_properties.items():
-            custom_property_definition_condensed = models.custom_property_definition_condensed(_id=custom_property_id)
-            for value in custom_property_values:
-                custom_property_value = models.custom_property_value(value=value,
-                                                                     definition=custom_property_definition_condensed)
-                custom_property_list.append(custom_property_value)
+        if custom_properties is not None:
+            for custom_property_id, custom_property_values in custom_properties.items():
+                custom_property_definition_condensed = models.custom_property_definition_condensed(_id=custom_property_id)
+                for value in custom_property_values:
+                    custom_property_value = models.custom_property_value(value=value,
+                                                                         definition=custom_property_definition_condensed)
+                    custom_property_list.append(custom_property_value)
 
         # Tags
         tag_list = []
-        for tag in tags:
-            tag_condensed = models.tag_condensed(_id=tag)
-            tag_list.append(tag_condensed)
+        if tags is not None:
+            for tag in tags:
+                tag_condensed = models.tag_condensed(_id=tag)
+                tag_list.append(tag_condensed)
 
         # Reload task structure without scheduler
         reload_task = models.reload_task(custom_properties=custom_property_list, name=task_name, tags=tag_list,
