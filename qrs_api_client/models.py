@@ -1,8 +1,19 @@
 from datetime import datetime
+import uuid
 
 
 def reload_task_bundle(schema_path: str = None, task=None, composite_events: list = None, schema_events: list = None):
+    """Creates a dictionary representing a reload task bundle.
 
+    Args:
+        schema_path (str, optional): The path to the schema.
+        task (dict, optional): The task data.
+        composite_events (list, optional): A list of composite events.
+        schema_events (list, optional): A list of schema events.
+
+    Returns:
+        dict: A dictionary containing the reload task bundle data.
+    """
     _reload_task_bundle = {}
 
     if schema_path is not None:
@@ -22,10 +33,25 @@ def reload_task_bundle(schema_path: str = None, task=None, composite_events: lis
     return _reload_task_bundle
 
 
-def reload_task_condensed(_id=None, privileges: list = None, name: str = None, task_type: int = None,
+def reload_task_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None, task_type: int = None,
                           enabled: bool = None, task_session_timeout: int = None, max_retries: int = None,
                           operational=None, time_to_live: int = None):
+    """Creates a dictionary representing a condensed reload task.
 
+    Args:
+        _id (uuid.UUID, optional): The unique identifier of the task.
+        privileges (list, optional): A list of privileges associated with the task.
+        name (str, optional): The name of the task.
+        task_type (int, optional): The type of task.
+        enabled (bool, optional): Whether the task is enabled.
+        task_session_timeout (int, optional): The task session timeout in seconds.
+        max_retries (int, optional): The maximum number of retries allowed.
+        operational (dict, optional): Operational details.
+        time_to_live (int, optional): The time-to-live value for the task.
+
+    Returns:
+        dict: A dictionary containing the condensed reload task data.
+    """
     _reload_task_condensed = {}
 
     if _id is not None:
@@ -60,12 +86,38 @@ def reload_task_condensed(_id=None, privileges: list = None, name: str = None, t
     return _reload_task_condensed
 
 
-def reload_task(_id=None, created_date=None, modified_date=None, modified_by_user_name: str = None,
-                schema_path: str = None, privileges: list = None, custom_properties: list = None, name: str = None,
-                task_type: int = None, enabled: bool = None, task_session_timeout: int = None, max_retries: int = None,
-                tags: list = None, app=None, is_manually_triggered: bool = None, operational=None,
-                is_partial_reload: bool = None, time_to_live: int = None, preload_nodes=None):
+def reload_task(_id: uuid.UUID = None, created_date: datetime = None, modified_date: datetime = None,
+                modified_by_user_name: str = None, schema_path: str = None, privileges: list = None,
+                custom_properties: list = None, name: str = None, task_type: int = None, enabled: bool = None,
+                task_session_timeout: int = None, max_retries: int = None, tags: list = None, app=None,
+                is_manually_triggered: bool = None, operational=None, is_partial_reload: bool = None,
+                time_to_live: int = None, preload_nodes=None):
+    """Creates a dictionary representing a reload task.
 
+    Args:
+        _id (uuid.UUID, optional): The unique identifier of the task.
+        created_date (datetime, optional): The creation date of the task.
+        modified_date (datetime, optional): The modification date of the task.
+        modified_by_user_name (str, optional): The username of the person who modified the task.
+        schema_path (str, optional): The path to the schema.
+        privileges (list, optional): A list of privileges associated with the task.
+        custom_properties (list, optional): Custom properties of the task.
+        name (str, optional): The name of the task.
+        task_type (int, optional): The type of task.
+        enabled (bool, optional): Whether the task is enabled.
+        task_session_timeout (int, optional): The task session timeout in seconds.
+        max_retries (int, optional): The maximum number of retries allowed.
+        tags (list, optional): A list of tags associated with the task.
+        app (dict, optional): Application-specific data.
+        is_manually_triggered (bool, optional): Whether the task is manually triggered.
+        operational (dict, optional): Operational details.
+        is_partial_reload (bool, optional): Whether the task supports partial reload.
+        time_to_live (int, optional): The time-to-live value for the task.
+        preload_nodes (list, optional): A list of preload nodes.
+
+    Returns:
+        dict: A dictionary containing the reload task data.
+    """
     _reload_task = {}
 
     if _id is not None:
@@ -132,9 +184,9 @@ def reload_task(_id=None, created_date=None, modified_date=None, modified_by_use
     return _reload_task
 
 
-def app_condensed(_id=None, privileges: list = None, name: str = None, app_id: str = None, publish_time=None,
-                  published: bool = None, stream=None, saved_in_product_version: str = None, migration_hash: str = None,
-                  availability_status=None):
+def app_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None, app_id: str = None,
+                  publish_time: datetime = None, published: bool = None, stream=None,
+                  saved_in_product_version: str = None, migration_hash: str = None, availability_status=None):
     _app_condensed = {}
 
     if _id is not None:
@@ -170,7 +222,7 @@ def app_condensed(_id=None, privileges: list = None, name: str = None, app_id: s
     return _app_condensed
 
 
-def schema_event_condensed(_id=None, privileges: list = None, name: str = None, enabled: bool = None,
+def schema_event_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None, enabled: bool = None,
                            event_type: int = None, operational=None):
     _schema_event_condensed = {}
 
@@ -197,12 +249,13 @@ def schema_event_condensed(_id=None, privileges: list = None, name: str = None, 
     return _schema_event_condensed
 
 
-def schema_event(_id=None, created_date=None, modified_date=None, modified_by_user_name: str = None,
+def schema_event(_id: uuid.UUID = None, created_date: datetime = None, modified_date: datetime = None,
+                 modified_by_user_name: str = None,
                  schema_path: str = None, privileges: list = None, name: str = None, enabled: bool = None,
                  event_type: int = None, _reload_task=None, user_sync_task=None, external_program_task=None,
                  time_zone: str = None, daylight_saving_time: int = None, start_date: datetime = None,
-                 expiration_date=None, schema_filter_description: list = None, increment_description: str = None,
-                 increment_option: int = None, operational=None):
+                 expiration_date: datetime = None, schema_filter_description: list = None,
+                 increment_description: str = None, increment_option: int = None, operational=None):
     _schema_event = {}
 
     if _id is not None:
@@ -270,8 +323,9 @@ def schema_event(_id=None, created_date=None, modified_date=None, modified_by_us
     return _schema_event
 
 
-def custom_property_value(_id=None, created_date=None, modified_date=None, modified_by_user_name: str = None,
-                          schema_path: str = None, value: str = None, definition=None):
+def custom_property_value(_id: uuid.UUID = None, created_date: datetime = None, modified_date: datetime = None,
+                          modified_by_user_name: str = None, schema_path: str = None, value: str = None,
+                          definition=None):
     _custom_property_value = {}
 
     if _id is not None:
@@ -302,8 +356,8 @@ def custom_property_value(_id=None, created_date=None, modified_date=None, modif
     return _custom_property_value
 
 
-def custom_property_definition_condensed(_id=None, privileges: list = None, name: str = None, value_type: str = None,
-                                         choice_values=None):
+def custom_property_definition_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None,
+                                         value_type: str = None, choice_values=None):
     _custom_property_definition_condensed = {}
 
     if _id is not None:
@@ -324,7 +378,7 @@ def custom_property_definition_condensed(_id=None, privileges: list = None, name
     return _custom_property_definition_condensed
 
 
-def tag_condensed(_id=None, privileges: list = None, name: str = None):
+def tag_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None):
     _tag_condensed = {}
 
     if _id is not None:
@@ -339,7 +393,8 @@ def tag_condensed(_id=None, privileges: list = None, name: str = None):
     return _tag_condensed
 
 
-def composite_event(_id=None, created_date=None, modified_date=None, modified_by_user_name: str = None,
+def composite_event(_id: uuid.UUID = None, created_date: datetime = None, modified_date: datetime = None,
+                    modified_by_user_name: str = None,
                     schema_path: str = None, privileges: list = None, name: str = None, enabled: bool = None,
                     event_type: int = None, _reload_task=None, user_sync_task=None, external_program_task=None,
                     time_constraint=None, composite_rules: list = None, operational=None):
@@ -395,7 +450,8 @@ def composite_event(_id=None, created_date=None, modified_date=None, modified_by
     return _composite_event
 
 
-def composite_event_rule(_id=None, created_date=None, modified_date=None, modified_by_user_name: str = None,
+def composite_event_rule(_id: uuid.UUID = None, created_date: datetime = None, modified_date: datetime = None,
+                         modified_by_user_name: str = None,
                          schema_path: str = None, rule_state: int = None, _reload_task=None, user_sync_task=None,
                          external_program_task=None, operational=None):
     _composite_event_rule = {}
@@ -433,7 +489,8 @@ def composite_event_rule(_id=None, created_date=None, modified_date=None, modifi
     return _composite_event_rule
 
 
-def composite_event_time_constraint(_id=None, created_date=None, modified_date=None, modified_by_user_name: str = None,
+def composite_event_time_constraint(_id: uuid.UUID = None, created_date: datetime = None,
+                                    modified_date: datetime = None, modified_by_user_name: str = None,
                                     schema_path: str = None, days: int = None, hours: int = None, minutes: int = None,
                                     seconds: int = None):
     _composite_event_time_constraint = {}

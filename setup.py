@@ -18,7 +18,8 @@ setup(
     ],
     install_requires=[
         "requests>=2.32.3",
-        "requests_ntlm>=1.2.0"
+        "requests_ntlm>=1.2.0",
+        "python-dotenv>=1.0.0"
     ],
     python_requires='>=3.6',
 )

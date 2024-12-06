@@ -1,29 +1,42 @@
 from requests_ntlm import HttpNtlmAuth
 import requests
+from dotenv import load_dotenv
+import os
+
+# Loads environment variables from .env file.
+load_dotenv()
 
 
 class AuthManager:
+    """
+    Manages authentication for connecting to services, supporting certificate and NTLM authentication.
+    """
     def __init__(self, cert_path=None, key_path=None, root_cert_path=None, user_id=None, password=None):
         """
-        Initialisiert den AuthManager mit optionalen Parametern für verschiedene Authentifizierungsmethoden.
+        Initializes the AuthManager with optional parameters for authentication methods.
 
-        :param cert_path: Pfad zur Zertifikatsdatei (.pem)
-        :param key_path: Pfad zur Schlüsseldatei (.key)
-        :param root_cert_path: Pfad zur Root-Zertifikatsdatei (root.pem)
-        :param user_id: User ID
-        :param password: password
+        Args:
+            cert_path (str, optional): Path to the certificate file (.pem).
+            key_path (str, optional): Path to the private key file (.key).
+            root_cert_path (str, optional): Path to the root certificate file (root.pem).
+            user_id (str, optional): User ID for NTLM authentication.
+            password (str, optional): Password for NTLM authentication.
         """
-        self.cert_path = cert_path
-        self.key_path = key_path
-        self.root_cert_path = root_cert_path
-        self.user_id = user_id
-        self.password = password
+        self.cert_path = cert_path if cert_path is not None else os.getenv("CERT_PATH")
+        self.key_path = key_path if key_path is not None else os.getenv("KEY_PATH")
+        self.root_cert_path = root_cert_path if root_cert_path is not None else os.getenv("ROOT_CERT_PATH")
+        self.user_id = user_id if user_id is not None else os.getenv("USER_ID")
+        self.password = password if password is not None else os.getenv("PASSWORD")
 
     def get_certificate_auth(self):
         """
-        Gibt das Zertifikats- und Schlüsselpfad-Tuple zurück.
+        Returns the certificate and key paths as a tuple for certificate-based authentication.
 
-        :return: Tuple (cert_path, key_path)
+        Returns:
+            tuple: A tuple containing the certificate path and key path.
+
+        Raises:
+            ValueError: If `cert_path` or `key_path` is not provided.
         """
         if not self.cert_path or not self.key_path:
             raise ValueError("Please insert cert_path and key_path for certificate authentication.")
@@ -31,9 +44,13 @@ class AuthManager:
 
     def get_ntlm_auth(self):
         """
-        Creates a NTLM authentication.
+        Creates an NTLM authentication object.
 
-        :return: requests_ntlm.HttpNtlmAuth-Objekt
+        Returns:
+            HttpNtlmAuth: An instance of `HttpNtlmAuth` for NTLM authentication.
+
+        Raises:
+            ValueError: If `user_id` or `password` is not provided.
         """
         if not self.user_id or not self.password:
             raise ValueError("Please insert user id and password for NTLM authentication")
@@ -42,12 +59,18 @@ class AuthManager:
 
     def get_auth(self, session: requests.Session, auth_method="certificate", verify_ssl=True):
         """
-        Gibt die Authentifizierung basierend auf der angegebenen Methode zurück.
+        Configures and returns the authentication for the specified method.
 
-        :param session: Das zu konfigurierende Session-Objekt.
-        :param auth_method: Authentifizierungsmethode ('certificate', 'ntlm').
-        :param verify_ssl: Bool oder Pfad zur root.pem für SSL-Verifizierung
-        :return: Authentifizierungsdaten (Tuple oder Auth-Objekt)
+        Args:
+            session (requests.Session): The session object to configure.
+            auth_method (str, optional): The authentication method to use ('certificate' or 'ntlm').
+            verify_ssl (bool or str, optional): Either a boolean for SSL verification or the path to a root.pem file.
+
+        Returns:
+            requests.Session: The configured session object.
+
+        Raises:
+            ValueError: If an unknown authentication method is specified.
         """
         if auth_method == "certificate":
             session.cert = self.get_certificate_auth()
