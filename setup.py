@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='qrs-api-client',
     version='2.0.0',
-    packages=find_packages(),
+    packages=find_packages(exclude=["examples", "docs"]),
     url='https://github.com/rumen-vasilev/qrs-api-client',
     license='Apache 2.0',
     author='Rumen Vasilev',
