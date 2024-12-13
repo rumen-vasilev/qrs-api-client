@@ -187,6 +187,24 @@ def reload_task(_id: uuid.UUID = None, created_date: datetime = None, modified_d
 def app_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None, app_id: str = None,
                   publish_time: datetime = None, published: bool = None, stream=None,
                   saved_in_product_version: str = None, migration_hash: str = None, availability_status=None):
+    """
+    Creates a condensed representation of an application.
+
+    Args:
+        _id (uuid.UUID, optional): Unique identifier of the application.
+        privileges (list, optional): List of privileges.
+        name (str, optional): Name of the application.
+        app_id (str, optional): Application ID.
+        publish_time (datetime, optional): Publish time of the application.
+        published (bool, optional): Whether the application is published.
+        stream (optional): Stream information.
+        saved_in_product_version (str, optional): Product version in which the application was saved.
+        migration_hash (str, optional): Migration hash for version control.
+        availability_status (optional): Availability status of the application.
+
+    Returns:
+        dict: Condensed application representation.
+    """
     _app_condensed = {}
 
     if _id is not None:
@@ -224,6 +242,20 @@ def app_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = No
 
 def schema_event_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None, enabled: bool = None,
                            event_type: int = None, operational=None):
+    """
+    Creates a condensed representation of a schema event.
+
+    Args:
+        _id (uuid.UUID, optional): Unique identifier of the schema event.
+        privileges (list, optional): List of privileges.
+        name (str, optional): Name of the schema event.
+        enabled (bool, optional): Whether the schema event is enabled.
+        event_type (int, optional): Type of the event.
+        operational (optional): Operational status or configuration.
+
+    Returns:
+        dict: Condensed schema event representation.
+    """
     _schema_event_condensed = {}
 
     if _id is not None:
@@ -256,6 +288,34 @@ def schema_event(_id: uuid.UUID = None, created_date: datetime = None, modified_
                  time_zone: str = None, daylight_saving_time: int = None, start_date: datetime = None,
                  expiration_date: datetime = None, schema_filter_description: list = None,
                  increment_description: str = None, increment_option: int = None, operational=None):
+    """
+    Creates a detailed representation of a schema event.
+
+    Args:
+        _id (uuid.UUID, optional): Unique identifier of the schema event.
+        created_date (datetime, optional): Creation date of the schema event.
+        modified_date (datetime, optional): Last modification date of the schema event.
+        modified_by_user_name (str, optional): Username of the person who modified the schema event.
+        schema_path (str, optional): Schema path of the event.
+        privileges (list, optional): List of privileges.
+        name (str, optional): Name of the schema event.
+        enabled (bool, optional): Whether the schema event is enabled.
+        event_type (int, optional): Type of the schema event.
+        _reload_task (optional): Reload task information.
+        user_sync_task (optional): User synchronization task information.
+        external_program_task (optional): External program task information.
+        time_zone (str, optional): Time zone of the schema event.
+        daylight_saving_time (int, optional): Daylight saving time offset.
+        start_date (datetime, optional): Start date of the schema event.
+        expiration_date (datetime, optional): Expiration date of the schema event.
+        schema_filter_description (list, optional): Description of schema filters.
+        increment_description (str, optional): Description of increments.
+        increment_option (int, optional): Increment option.
+        operational (optional): Operational status or configuration.
+
+    Returns:
+        dict: Detailed schema event representation.
+    """
     _schema_event = {}
 
     if _id is not None:
@@ -326,6 +386,21 @@ def schema_event(_id: uuid.UUID = None, created_date: datetime = None, modified_
 def custom_property_value(_id: uuid.UUID = None, created_date: datetime = None, modified_date: datetime = None,
                           modified_by_user_name: str = None, schema_path: str = None, value: str = None,
                           definition=None):
+    """
+    Creates a dictionary representing a custom property value.
+
+    Args:
+        _id (uuid.UUID, optional): The unique identifier for the custom property value.
+        created_date (datetime, optional): The date the property was created.
+        modified_date (datetime, optional): The date the property was last modified.
+        modified_by_user_name (str, optional): The username of the person who last modified the property.
+        schema_path (str, optional): The schema path for the custom property.
+        value (str, optional): The value of the custom property. Defaults to an empty string if not provided.
+        definition (optional): The definition of the custom property.
+
+    Returns:
+        dict: A dictionary representing the custom property value.
+    """
     _custom_property_value = {}
 
     if _id is not None:
@@ -358,6 +433,19 @@ def custom_property_value(_id: uuid.UUID = None, created_date: datetime = None, 
 
 def custom_property_definition_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None,
                                          value_type: str = None, choice_values=None):
+    """
+    Creates a dictionary representing a condensed custom property definition.
+
+    Args:
+        _id (uuid.UUID, optional): The unique identifier for the property definition.
+        privileges (list, optional): A list of privileges associated with the property.
+        name (str, optional): The name of the property definition.
+        value_type (str, optional): The type of value the property accepts.
+        choice_values (optional): Possible values for the property.
+
+    Returns:
+        dict: A dictionary representing the custom property definition.
+    """
     _custom_property_definition_condensed = {}
 
     if _id is not None:
@@ -379,6 +467,17 @@ def custom_property_definition_condensed(_id: uuid.UUID = None, privileges: list
 
 
 def tag_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None):
+    """
+    Creates a dictionary representing a condensed tag.
+
+    Args:
+        _id (uuid.UUID, optional): The unique identifier for the tag.
+        privileges (list, optional): A list of privileges associated with the tag.
+        name (str, optional): The name of the tag.
+
+    Returns:
+        dict: A dictionary representing the tag.
+    """
     _tag_condensed = {}
 
     if _id is not None:
@@ -398,6 +497,29 @@ def composite_event(_id: uuid.UUID = None, created_date: datetime = None, modifi
                     schema_path: str = None, privileges: list = None, name: str = None, enabled: bool = None,
                     event_type: int = None, _reload_task=None, user_sync_task=None, external_program_task=None,
                     time_constraint=None, composite_rules: list = None, operational=None):
+    """
+    Creates a dictionary representing a composite event.
+
+    Args:
+        _id (uuid.UUID, optional): The unique identifier for the event.
+        created_date (datetime, optional): The date the event was created.
+        modified_date (datetime, optional): The date the event was last modified.
+        modified_by_user_name (str, optional): The username of the person who last modified the event.
+        schema_path (str, optional): The schema path for the event.
+        privileges (list, optional): A list of privileges associated with the event.
+        name (str, optional): The name of the event. Defaults to an empty string if not provided.
+        enabled (bool, optional): Whether the event is enabled.
+        event_type (int, optional): The type of event.
+        _reload_task (optional): The reload task associated with the event.
+        user_sync_task (optional): The user synchronization task associated with the event.
+        external_program_task (optional): The external program task associated with the event.
+        time_constraint (optional): The time constraint for the event.
+        composite_rules (list, optional): A list of composite rules for the event.
+        operational (optional): Operational status of the event.
+
+    Returns:
+        dict: A dictionary representing the composite event.
+    """
     _composite_event = {}
 
     if _id is not None:
@@ -454,6 +576,24 @@ def composite_event_rule(_id: uuid.UUID = None, created_date: datetime = None, m
                          modified_by_user_name: str = None,
                          schema_path: str = None, rule_state: int = None, _reload_task=None, user_sync_task=None,
                          external_program_task=None, operational=None):
+    """
+    Creates a dictionary representing a composite event rule.
+
+    Args:
+        _id (uuid.UUID, optional): The unique identifier for the composite event rule.
+        created_date (datetime, optional): The date the rule was created.
+        modified_date (datetime, optional): The date the rule was last modified.
+        modified_by_user_name (str, optional): The username of the person who last modified the rule.
+        schema_path (str, optional): The schema path for the rule.
+        rule_state (int, optional): The state of the rule.
+        _reload_task (optional): The reload task associated with the rule.
+        user_sync_task (optional): The user synchronization task associated with the rule.
+        external_program_task (optional): The external program task associated with the rule.
+        operational (optional): Operational status of the rule.
+
+    Returns:
+        dict: A dictionary representing the composite event rule.
+    """
     _composite_event_rule = {}
 
     if _id is not None:
@@ -493,6 +633,23 @@ def composite_event_time_constraint(_id: uuid.UUID = None, created_date: datetim
                                     modified_date: datetime = None, modified_by_user_name: str = None,
                                     schema_path: str = None, days: int = None, hours: int = None, minutes: int = None,
                                     seconds: int = None):
+    """
+    Creates a dictionary representing a time constraint for a composite event.
+
+    Args:
+        _id (uuid.UUID, optional): The unique identifier for the time constraint.
+        created_date (datetime, optional): The date the time constraint was created.
+        modified_date (datetime, optional): The date the time constraint was last modified.
+        modified_by_user_name (str, optional): The username of the person who last modified the time constraint.
+        schema_path (str, optional): The schema path for the time constraint.
+        days (int, optional): The number of days in the time constraint.
+        hours (int, optional): The number of hours in the time constraint.
+        minutes (int, optional): The number of minutes in the time constraint.
+        seconds (int, optional): The number of seconds in the time constraint.
+
+    Returns:
+        dict: A dictionary representing the composite event time constraint.
+    """
     _composite_event_time_constraint = {}
 
     if _id is not None:
