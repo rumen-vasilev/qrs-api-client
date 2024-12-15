@@ -8,7 +8,7 @@ setup(
     license='Apache 2.0',
     author='Rumen Vasilev',
     author_email='rumen.vasilev@gmail.com',
-    description='Project forked from clintcarr.',
+    description='Python client for Qlik Sense Repository Service API.',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     classifiers=[
