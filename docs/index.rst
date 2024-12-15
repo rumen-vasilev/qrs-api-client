@@ -12,6 +12,7 @@ QRS API Client documentation
 
    client
    models
+   auth
 
 
 Indices and tables
