@@ -1,5 +1,4 @@
 from qrs_api_client.client import QRSClient
-from qrs_api_client.auth import AuthManager
 import qrs_api_client.models as models
 from dotenv import load_dotenv
 import os
