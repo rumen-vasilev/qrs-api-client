@@ -68,31 +68,32 @@ class QRSClient:
             print(f"API request error: {e}")
             return None
 
-    def get(self, endpoint: str, params=None) -> dict:
+    def get(self, endpoint: str, params: str = None) -> dict:
         """
         Executes a GET request to the QRS API.
 
         Args:
             endpoint (str): The API endpoint to call.
-            params (dict, optional): Query parameters to include in the request.
+            params (str, optional): Query parameters to include in the request.
 
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
         """
         return self._request("GET", endpoint, params=params)
 
-    def post(self, endpoint: str, data=None) -> dict:
+    def post(self, endpoint: str, params: str = None, data=None) -> dict:
         """
         Executes a POST request to the QRS API.
 
         Args:
             endpoint (str): The API endpoint to call.
+            params (str, optional): Query parameters to include in the request.
             data (dict or str, optional): The JSON payload to include in the request body.
 
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
         """
-        return self._request("POST", endpoint, data=data)
+        return self._request("POST", endpoint, params=params, data=data)
 
     def delete(self, endpoint: str) -> dict:
         """
@@ -155,4 +156,4 @@ class QRSClient:
         payload = json.dumps(reload_task_bundle)
 
         # Execute API call
-        return self.post("reloadtask/create", data=payload)
+        return self.post(endpoint="reloadtask/create", data=payload)
