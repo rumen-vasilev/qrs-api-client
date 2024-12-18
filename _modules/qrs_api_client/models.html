@@ -1,0 +1,821 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qrs_api_client.models &mdash; QRS API Client 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            QRS API Client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../client.html">QRS API Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">QRS API Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auth.html">QRS API Authentication</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QRS API Client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qrs_api_client.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qrs_api_client.models</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+
+<div class="viewcode-block" id="reload_task_bundle">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.reload_task_bundle">[docs]</a>
+<span class="k">def</span> <span class="nf">reload_task_bundle</span><span class="p">(</span><span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">composite_events</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">schema_events</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a dictionary representing a reload task bundle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema_path (str, optional): The path to the schema.</span>
+<span class="sd">        task (dict, optional): The task data.</span>
+<span class="sd">        composite_events (list, optional): A list of composite events.</span>
+<span class="sd">        schema_events (list, optional): A list of schema events.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary containing the reload task bundle data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_reload_task_bundle</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_bundle</span><span class="p">[</span><span class="s2">&quot;schemaPath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_path</span>
+
+    <span class="k">if</span> <span class="n">task</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_bundle</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_reload_task_bundle</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
+
+    <span class="k">if</span> <span class="n">composite_events</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_bundle</span><span class="p">[</span><span class="s2">&quot;compositeEvents&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">composite_events</span>
+
+    <span class="k">if</span> <span class="n">schema_events</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_bundle</span><span class="p">[</span><span class="s2">&quot;schemaEvents&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_events</span>
+
+    <span class="k">return</span> <span class="n">_reload_task_bundle</span></div>
+
+
+
+<div class="viewcode-block" id="reload_task_condensed">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.reload_task_condensed">[docs]</a>
+<span class="k">def</span> <span class="nf">reload_task_condensed</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">privileges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">task_session_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">operational</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_to_live</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a dictionary representing a condensed reload task.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): The unique identifier of the task.</span>
+<span class="sd">        privileges (list, optional): A list of privileges associated with the task.</span>
+<span class="sd">        name (str, optional): The name of the task.</span>
+<span class="sd">        task_type (int, optional): The type of task.</span>
+<span class="sd">        enabled (bool, optional): Whether the task is enabled.</span>
+<span class="sd">        task_session_timeout (int, optional): The task session timeout in seconds.</span>
+<span class="sd">        max_retries (int, optional): The maximum number of retries allowed.</span>
+<span class="sd">        operational (dict, optional): Operational details.</span>
+<span class="sd">        time_to_live (int, optional): The time-to-live value for the task.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary containing the condensed reload task data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_reload_task_condensed</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">privileges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;privileges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">privileges</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">task_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;taskType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_type</span>
+
+    <span class="k">if</span> <span class="n">enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;enabled&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enabled</span>
+
+    <span class="k">if</span> <span class="n">task_session_timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;taskSessionTimeout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_session_timeout</span>
+
+    <span class="k">if</span> <span class="n">max_retries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;maxRetries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_retries</span>
+
+    <span class="k">if</span> <span class="n">operational</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;operational&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">operational</span>
+
+    <span class="k">if</span> <span class="n">time_to_live</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task_condensed</span><span class="p">[</span><span class="s2">&quot;timeToLive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_to_live</span>
+
+    <span class="k">return</span> <span class="n">_reload_task_condensed</span></div>
+
+
+
+<div class="viewcode-block" id="reload_task">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.reload_task">[docs]</a>
+<span class="k">def</span> <span class="nf">reload_task</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">created_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">modified_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">modified_by_user_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">privileges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">custom_properties</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">task_session_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">app</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">is_manually_triggered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">operational</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_partial_reload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">time_to_live</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">preload_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a dictionary representing a reload task.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): The unique identifier of the task.</span>
+<span class="sd">        created_date (datetime, optional): The creation date of the task.</span>
+<span class="sd">        modified_date (datetime, optional): The modification date of the task.</span>
+<span class="sd">        modified_by_user_name (str, optional): The username of the person who modified the task.</span>
+<span class="sd">        schema_path (str, optional): The path to the schema.</span>
+<span class="sd">        privileges (list, optional): A list of privileges associated with the task.</span>
+<span class="sd">        custom_properties (list, optional): Custom properties of the task.</span>
+<span class="sd">        name (str, optional): The name of the task.</span>
+<span class="sd">        task_type (int, optional): The type of task.</span>
+<span class="sd">        enabled (bool, optional): Whether the task is enabled.</span>
+<span class="sd">        task_session_timeout (int, optional): The task session timeout in seconds.</span>
+<span class="sd">        max_retries (int, optional): The maximum number of retries allowed.</span>
+<span class="sd">        tags (list, optional): A list of tags associated with the task.</span>
+<span class="sd">        app (dict, optional): Application-specific data.</span>
+<span class="sd">        is_manually_triggered (bool, optional): Whether the task is manually triggered.</span>
+<span class="sd">        operational (dict, optional): Operational details.</span>
+<span class="sd">        is_partial_reload (bool, optional): Whether the task supports partial reload.</span>
+<span class="sd">        time_to_live (int, optional): The time-to-live value for the task.</span>
+<span class="sd">        preload_nodes (list, optional): A list of preload nodes.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary containing the reload task data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_reload_task</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">created_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;createdDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">created_date</span>
+
+    <span class="k">if</span> <span class="n">modified_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;modifiedDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_date</span>
+
+    <span class="k">if</span> <span class="n">modified_by_user_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;modifiedByUserName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_by_user_name</span>
+
+    <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;schemaPath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_path</span>
+
+    <span class="k">if</span> <span class="n">privileges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;privileges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">privileges</span>
+
+    <span class="k">if</span> <span class="n">custom_properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;customProperties&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_properties</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">task_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;taskType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_type</span>
+
+    <span class="k">if</span> <span class="n">enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;enabled&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enabled</span>
+
+    <span class="k">if</span> <span class="n">task_session_timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;taskSessionTimeout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_session_timeout</span>
+
+    <span class="k">if</span> <span class="n">max_retries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;maxRetries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_retries</span>
+
+    <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tags</span>
+
+    <span class="k">if</span> <span class="n">app</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;app&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;app&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span>
+
+    <span class="k">if</span> <span class="n">is_manually_triggered</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;isManuallyTriggered&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_manually_triggered</span>
+
+    <span class="k">if</span> <span class="n">operational</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;operational&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">operational</span>
+
+    <span class="k">if</span> <span class="n">is_partial_reload</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;isPartialReload&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_partial_reload</span>
+
+    <span class="k">if</span> <span class="n">time_to_live</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;timeToLive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_to_live</span>
+
+    <span class="k">if</span> <span class="n">preload_nodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_reload_task</span><span class="p">[</span><span class="s2">&quot;preloadNodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">preload_nodes</span>
+
+    <span class="k">return</span> <span class="n">_reload_task</span></div>
+
+
+
+<div class="viewcode-block" id="app_condensed">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.app_condensed">[docs]</a>
+<span class="k">def</span> <span class="nf">app_condensed</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">privileges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">app_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="n">publish_time</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">published</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">saved_in_product_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">migration_hash</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">availability_status</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a condensed representation of an application.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): Unique identifier of the application.</span>
+<span class="sd">        privileges (list, optional): List of privileges.</span>
+<span class="sd">        name (str, optional): Name of the application.</span>
+<span class="sd">        app_id (str, optional): Application ID.</span>
+<span class="sd">        publish_time (datetime, optional): Publish time of the application.</span>
+<span class="sd">        published (bool, optional): Whether the application is published.</span>
+<span class="sd">        stream (optional): Stream information.</span>
+<span class="sd">        saved_in_product_version (str, optional): Product version in which the application was saved.</span>
+<span class="sd">        migration_hash (str, optional): Migration hash for version control.</span>
+<span class="sd">        availability_status (optional): Availability status of the application.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Condensed application representation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_app_condensed</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">privileges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;privileges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">privileges</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">app_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;appId&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">app_id</span>
+
+    <span class="k">if</span> <span class="n">publish_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;publishTime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">publish_time</span>
+
+    <span class="k">if</span> <span class="n">published</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;published&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">published</span>
+
+    <span class="k">if</span> <span class="n">stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;stream&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stream</span>
+
+    <span class="k">if</span> <span class="n">saved_in_product_version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;savedInProductVersion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">saved_in_product_version</span>
+
+    <span class="k">if</span> <span class="n">migration_hash</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;migrationHash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">migration_hash</span>
+
+    <span class="k">if</span> <span class="n">availability_status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_app_condensed</span><span class="p">[</span><span class="s2">&quot;availabilityStatus&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">availability_status</span>
+
+    <span class="k">return</span> <span class="n">_app_condensed</span></div>
+
+
+
+<div class="viewcode-block" id="schema_event_condensed">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.schema_event_condensed">[docs]</a>
+<span class="k">def</span> <span class="nf">schema_event_condensed</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">privileges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">event_type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">operational</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a condensed representation of a schema event.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): Unique identifier of the schema event.</span>
+<span class="sd">        privileges (list, optional): List of privileges.</span>
+<span class="sd">        name (str, optional): Name of the schema event.</span>
+<span class="sd">        enabled (bool, optional): Whether the schema event is enabled.</span>
+<span class="sd">        event_type (int, optional): Type of the event.</span>
+<span class="sd">        operational (optional): Operational status or configuration.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Condensed schema event representation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_schema_event_condensed</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event_condensed</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">privileges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event_condensed</span><span class="p">[</span><span class="s2">&quot;privileges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">privileges</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event_condensed</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_schema_event_condensed</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event_condensed</span><span class="p">[</span><span class="s2">&quot;enabled&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enabled</span>
+
+    <span class="k">if</span> <span class="n">event_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event_condensed</span><span class="p">[</span><span class="s2">&quot;eventType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_type</span>
+
+    <span class="k">if</span> <span class="n">operational</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event_condensed</span><span class="p">[</span><span class="s2">&quot;operational&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">operational</span>
+
+    <span class="k">return</span> <span class="n">_schema_event_condensed</span></div>
+
+
+
+<div class="viewcode-block" id="schema_event">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.schema_event">[docs]</a>
+<span class="k">def</span> <span class="nf">schema_event</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">created_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">modified_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">modified_by_user_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">privileges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">event_type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">_reload_task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user_sync_task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">external_program_task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">time_zone</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">daylight_saving_time</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">expiration_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">schema_filter_description</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">increment_description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">increment_option</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">operational</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a detailed representation of a schema event.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): Unique identifier of the schema event.</span>
+<span class="sd">        created_date (datetime, optional): Creation date of the schema event.</span>
+<span class="sd">        modified_date (datetime, optional): Last modification date of the schema event.</span>
+<span class="sd">        modified_by_user_name (str, optional): Username of the person who modified the schema event.</span>
+<span class="sd">        schema_path (str, optional): Schema path of the event.</span>
+<span class="sd">        privileges (list, optional): List of privileges.</span>
+<span class="sd">        name (str, optional): Name of the schema event.</span>
+<span class="sd">        enabled (bool, optional): Whether the schema event is enabled.</span>
+<span class="sd">        event_type (int, optional): Type of the schema event.</span>
+<span class="sd">        _reload_task (optional): Reload task information.</span>
+<span class="sd">        user_sync_task (optional): User synchronization task information.</span>
+<span class="sd">        external_program_task (optional): External program task information.</span>
+<span class="sd">        time_zone (str, optional): Time zone of the schema event.</span>
+<span class="sd">        daylight_saving_time (int, optional): Daylight saving time offset.</span>
+<span class="sd">        start_date (datetime, optional): Start date of the schema event.</span>
+<span class="sd">        expiration_date (datetime, optional): Expiration date of the schema event.</span>
+<span class="sd">        schema_filter_description (list, optional): Description of schema filters.</span>
+<span class="sd">        increment_description (str, optional): Description of increments.</span>
+<span class="sd">        increment_option (int, optional): Increment option.</span>
+<span class="sd">        operational (optional): Operational status or configuration.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Detailed schema event representation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_schema_event</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">created_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;createdDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">created_date</span>
+
+    <span class="k">if</span> <span class="n">modified_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;modifiedDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_date</span>
+
+    <span class="k">if</span> <span class="n">modified_by_user_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;modifiedByUserName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_by_user_name</span>
+
+    <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;schemaPath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_path</span>
+
+    <span class="k">if</span> <span class="n">privileges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;privileges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">privileges</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;enabled&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enabled</span>
+
+    <span class="k">if</span> <span class="n">event_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;eventType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_type</span>
+
+    <span class="k">if</span> <span class="n">_reload_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;reloadTask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_reload_task</span>
+
+    <span class="k">if</span> <span class="n">user_sync_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;userSyncTask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_sync_task</span>
+
+    <span class="k">if</span> <span class="n">external_program_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;externalProgramTask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">external_program_task</span>
+
+    <span class="k">if</span> <span class="n">time_zone</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;timeZone&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_zone</span>
+
+    <span class="k">if</span> <span class="n">daylight_saving_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;daylightSavingTime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">daylight_saving_time</span>
+
+    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;startDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_date</span>
+
+    <span class="k">if</span> <span class="n">expiration_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;expirationDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expiration_date</span>
+
+    <span class="k">if</span> <span class="n">schema_filter_description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;schemaFilterDescription&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_filter_description</span>
+
+    <span class="k">if</span> <span class="n">increment_description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;incrementDescription&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">increment_description</span>
+
+    <span class="k">if</span> <span class="n">increment_option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;incrementOption&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">increment_option</span>
+
+    <span class="k">if</span> <span class="n">operational</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_schema_event</span><span class="p">[</span><span class="s2">&quot;operational&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">operational</span>
+
+    <span class="k">return</span> <span class="n">_schema_event</span></div>
+
+
+
+<div class="viewcode-block" id="custom_property_value">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.custom_property_value">[docs]</a>
+<span class="k">def</span> <span class="nf">custom_property_value</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">created_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">modified_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">modified_by_user_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">definition</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a dictionary representing a custom property value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): The unique identifier for the custom property value.</span>
+<span class="sd">        created_date (datetime, optional): The date the property was created.</span>
+<span class="sd">        modified_date (datetime, optional): The date the property was last modified.</span>
+<span class="sd">        modified_by_user_name (str, optional): The username of the person who last modified the property.</span>
+<span class="sd">        schema_path (str, optional): The schema path for the custom property.</span>
+<span class="sd">        value (str, optional): The value of the custom property. Defaults to an empty string if not provided.</span>
+<span class="sd">        definition (optional): The definition of the custom property.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary representing the custom property value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_custom_property_value</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_value</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">created_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_value</span><span class="p">[</span><span class="s2">&quot;createdDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">created_date</span>
+
+    <span class="k">if</span> <span class="n">modified_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_value</span><span class="p">[</span><span class="s2">&quot;modifiedDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_date</span>
+
+    <span class="k">if</span> <span class="n">modified_by_user_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_value</span><span class="p">[</span><span class="s2">&quot;modifiedByUserName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_by_user_name</span>
+
+    <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_value</span><span class="p">[</span><span class="s2">&quot;schemaPath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_path</span>
+
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_value</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_custom_property_value</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">if</span> <span class="n">definition</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_value</span><span class="p">[</span><span class="s2">&quot;definition&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_custom_property_value</span><span class="p">[</span><span class="s2">&quot;definition&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">definition</span>
+
+    <span class="k">return</span> <span class="n">_custom_property_value</span></div>
+
+
+
+<div class="viewcode-block" id="custom_property_definition_condensed">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.custom_property_definition_condensed">[docs]</a>
+<span class="k">def</span> <span class="nf">custom_property_definition_condensed</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">privileges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">value_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">choice_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a dictionary representing a condensed custom property definition.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): The unique identifier for the property definition.</span>
+<span class="sd">        privileges (list, optional): A list of privileges associated with the property.</span>
+<span class="sd">        name (str, optional): The name of the property definition.</span>
+<span class="sd">        value_type (str, optional): The type of value the property accepts.</span>
+<span class="sd">        choice_values (optional): Possible values for the property.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary representing the custom property definition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_custom_property_definition_condensed</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_definition_condensed</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">privileges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_definition_condensed</span><span class="p">[</span><span class="s2">&quot;privileges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">privileges</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_definition_condensed</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">value_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_definition_condensed</span><span class="p">[</span><span class="s2">&quot;valueType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_type</span>
+
+    <span class="k">if</span> <span class="n">choice_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_custom_property_definition_condensed</span><span class="p">[</span><span class="s2">&quot;choiceValues&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">choice_values</span>
+
+    <span class="k">return</span> <span class="n">_custom_property_definition_condensed</span></div>
+
+
+
+<div class="viewcode-block" id="tag_condensed">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.tag_condensed">[docs]</a>
+<span class="k">def</span> <span class="nf">tag_condensed</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">privileges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a dictionary representing a condensed tag.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): The unique identifier for the tag.</span>
+<span class="sd">        privileges (list, optional): A list of privileges associated with the tag.</span>
+<span class="sd">        name (str, optional): The name of the tag.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary representing the tag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_tag_condensed</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_tag_condensed</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">privileges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_tag_condensed</span><span class="p">[</span><span class="s2">&quot;privileges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">privileges</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_tag_condensed</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">return</span> <span class="n">_tag_condensed</span></div>
+
+
+
+<div class="viewcode-block" id="composite_event">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.composite_event">[docs]</a>
+<span class="k">def</span> <span class="nf">composite_event</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">created_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">modified_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">modified_by_user_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">privileges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">event_type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">_reload_task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user_sync_task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">external_program_task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">time_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">composite_rules</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">operational</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a dictionary representing a composite event.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): The unique identifier for the event.</span>
+<span class="sd">        created_date (datetime, optional): The date the event was created.</span>
+<span class="sd">        modified_date (datetime, optional): The date the event was last modified.</span>
+<span class="sd">        modified_by_user_name (str, optional): The username of the person who last modified the event.</span>
+<span class="sd">        schema_path (str, optional): The schema path for the event.</span>
+<span class="sd">        privileges (list, optional): A list of privileges associated with the event.</span>
+<span class="sd">        name (str, optional): The name of the event. Defaults to an empty string if not provided.</span>
+<span class="sd">        enabled (bool, optional): Whether the event is enabled.</span>
+<span class="sd">        event_type (int, optional): The type of event.</span>
+<span class="sd">        _reload_task (optional): The reload task associated with the event.</span>
+<span class="sd">        user_sync_task (optional): The user synchronization task associated with the event.</span>
+<span class="sd">        external_program_task (optional): The external program task associated with the event.</span>
+<span class="sd">        time_constraint (optional): The time constraint for the event.</span>
+<span class="sd">        composite_rules (list, optional): A list of composite rules for the event.</span>
+<span class="sd">        operational (optional): Operational status of the event.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary representing the composite event.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_composite_event</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">created_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;createdDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">created_date</span>
+
+    <span class="k">if</span> <span class="n">modified_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;modifiedDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_date</span>
+
+    <span class="k">if</span> <span class="n">modified_by_user_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;modifiedByUserName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_by_user_name</span>
+
+    <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;schemaPath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_path</span>
+
+    <span class="k">if</span> <span class="n">privileges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;privileges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">privileges</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;enabled&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enabled</span>
+
+    <span class="k">if</span> <span class="n">event_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;eventType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_type</span>
+
+    <span class="k">if</span> <span class="n">_reload_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;reloadTask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_reload_task</span>
+
+    <span class="k">if</span> <span class="n">user_sync_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;userSyncTask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_sync_task</span>
+
+    <span class="k">if</span> <span class="n">external_program_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;externalProgramTask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">external_program_task</span>
+
+    <span class="k">if</span> <span class="n">time_constraint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;timeConstraint&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_constraint</span>
+
+    <span class="k">if</span> <span class="n">composite_rules</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;compositeRules&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">composite_rules</span>
+
+    <span class="k">if</span> <span class="n">operational</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event</span><span class="p">[</span><span class="s2">&quot;operational&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">operational</span>
+
+    <span class="k">return</span> <span class="n">_composite_event</span></div>
+
+
+
+<div class="viewcode-block" id="composite_event_rule">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.composite_event_rule">[docs]</a>
+<span class="k">def</span> <span class="nf">composite_event_rule</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">created_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">modified_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">modified_by_user_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">rule_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">_reload_task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user_sync_task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">external_program_task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">operational</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a dictionary representing a composite event rule.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): The unique identifier for the composite event rule.</span>
+<span class="sd">        created_date (datetime, optional): The date the rule was created.</span>
+<span class="sd">        modified_date (datetime, optional): The date the rule was last modified.</span>
+<span class="sd">        modified_by_user_name (str, optional): The username of the person who last modified the rule.</span>
+<span class="sd">        schema_path (str, optional): The schema path for the rule.</span>
+<span class="sd">        rule_state (int, optional): The state of the rule.</span>
+<span class="sd">        _reload_task (optional): The reload task associated with the rule.</span>
+<span class="sd">        user_sync_task (optional): The user synchronization task associated with the rule.</span>
+<span class="sd">        external_program_task (optional): The external program task associated with the rule.</span>
+<span class="sd">        operational (optional): Operational status of the rule.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary representing the composite event rule.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_composite_event_rule</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">created_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;createdDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">created_date</span>
+
+    <span class="k">if</span> <span class="n">modified_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;modifiedDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_date</span>
+
+    <span class="k">if</span> <span class="n">modified_by_user_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;modifiedByUserName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_by_user_name</span>
+
+    <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;schemaPath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_path</span>
+
+    <span class="k">if</span> <span class="n">rule_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;ruleState&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rule_state</span>
+
+    <span class="k">if</span> <span class="n">_reload_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;reloadTask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_reload_task</span>
+
+    <span class="k">if</span> <span class="n">user_sync_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;userSyncTask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_sync_task</span>
+
+    <span class="k">if</span> <span class="n">external_program_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;externalProgramTask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">external_program_task</span>
+
+    <span class="k">if</span> <span class="n">operational</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_rule</span><span class="p">[</span><span class="s2">&quot;operational&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">operational</span>
+
+    <span class="k">return</span> <span class="n">_composite_event_rule</span></div>
+
+
+
+<div class="viewcode-block" id="composite_event_time_constraint">
+<a class="viewcode-back" href="../../models.html#qrs_api_client.models.composite_event_time_constraint">[docs]</a>
+<span class="k">def</span> <span class="nf">composite_event_time_constraint</span><span class="p">(</span><span class="n">_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">created_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                    <span class="n">modified_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">modified_by_user_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                    <span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">hours</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">minutes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                    <span class="n">seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a dictionary representing a time constraint for a composite event.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _id (uuid.UUID, optional): The unique identifier for the time constraint.</span>
+<span class="sd">        created_date (datetime, optional): The date the time constraint was created.</span>
+<span class="sd">        modified_date (datetime, optional): The date the time constraint was last modified.</span>
+<span class="sd">        modified_by_user_name (str, optional): The username of the person who last modified the time constraint.</span>
+<span class="sd">        schema_path (str, optional): The schema path for the time constraint.</span>
+<span class="sd">        days (int, optional): The number of days in the time constraint.</span>
+<span class="sd">        hours (int, optional): The number of hours in the time constraint.</span>
+<span class="sd">        minutes (int, optional): The number of minutes in the time constraint.</span>
+<span class="sd">        seconds (int, optional): The number of seconds in the time constraint.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary representing the composite event time constraint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_composite_event_time_constraint</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_time_constraint</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="k">if</span> <span class="n">created_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_time_constraint</span><span class="p">[</span><span class="s2">&quot;createdDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">created_date</span>
+
+    <span class="k">if</span> <span class="n">modified_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_time_constraint</span><span class="p">[</span><span class="s2">&quot;modifiedDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_date</span>
+
+    <span class="k">if</span> <span class="n">modified_by_user_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_time_constraint</span><span class="p">[</span><span class="s2">&quot;modifiedByUserName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modified_by_user_name</span>
+
+    <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_time_constraint</span><span class="p">[</span><span class="s2">&quot;schemaPath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_path</span>
+
+    <span class="k">if</span> <span class="n">days</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_time_constraint</span><span class="p">[</span><span class="s2">&quot;days&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">days</span>
+
+    <span class="k">if</span> <span class="n">hours</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_time_constraint</span><span class="p">[</span><span class="s2">&quot;hours&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hours</span>
+
+    <span class="k">if</span> <span class="n">minutes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_time_constraint</span><span class="p">[</span><span class="s2">&quot;minutes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">minutes</span>
+
+    <span class="k">if</span> <span class="n">seconds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_composite_event_time_constraint</span><span class="p">[</span><span class="s2">&quot;seconds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">seconds</span>
+
+    <span class="k">return</span> <span class="n">_composite_event_time_constraint</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Rumen Vasilev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

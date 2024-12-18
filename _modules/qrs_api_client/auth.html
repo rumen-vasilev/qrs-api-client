@@ -1,0 +1,203 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qrs_api_client.auth &mdash; QRS API Client 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            QRS API Client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../client.html">QRS API Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">QRS API Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auth.html">QRS API Authentication</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QRS API Client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qrs_api_client.auth</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qrs_api_client.auth</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">requests_ntlm</span> <span class="kn">import</span> <span class="n">HttpNtlmAuth</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># Loads environment variables from .env file.</span>
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="AuthManager">
+<a class="viewcode-back" href="../../auth.html#qrs_api_client.auth.AuthManager">[docs]</a>
+<span class="k">class</span> <span class="nc">AuthManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manages authentication for connecting to services, supporting certificate and NTLM authentication.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cert_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">key_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">root_cert_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the AuthManager with optional parameters for authentication methods.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cert_path (str, optional): Path to the certificate file (.pem).</span>
+<span class="sd">            key_path (str, optional): Path to the private key file (.key).</span>
+<span class="sd">            root_cert_path (str, optional): Path to the root certificate file (root.pem).</span>
+<span class="sd">            user_id (str, optional): User ID for NTLM authentication.</span>
+<span class="sd">            password (str, optional): Password for NTLM authentication.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cert_path</span> <span class="o">=</span> <span class="n">cert_path</span> <span class="k">if</span> <span class="n">cert_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;CERT_PATH&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_path</span> <span class="o">=</span> <span class="n">key_path</span> <span class="k">if</span> <span class="n">key_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KEY_PATH&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root_cert_path</span> <span class="o">=</span> <span class="n">root_cert_path</span> <span class="k">if</span> <span class="n">root_cert_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ROOT_CERT_PATH&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">user_id</span> <span class="k">if</span> <span class="n">user_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;USER_ID&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span> <span class="k">if</span> <span class="n">password</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PASSWORD&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AuthManager.get_certificate_auth">
+<a class="viewcode-back" href="../../auth.html#qrs_api_client.auth.AuthManager.get_certificate_auth">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_certificate_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the certificate and key paths as a tuple for certificate-based authentication.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: A tuple containing the certificate path and key path.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If `cert_path` or `key_path` is not provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cert_path</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please insert cert_path and key_path for certificate authentication.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cert_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_path</span></div>
+
+
+<div class="viewcode-block" id="AuthManager.get_ntlm_auth">
+<a class="viewcode-back" href="../../auth.html#qrs_api_client.auth.AuthManager.get_ntlm_auth">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_ntlm_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an NTLM authentication object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            HttpNtlmAuth: An instance of `HttpNtlmAuth` for NTLM authentication.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If `user_id` or `password` is not provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please insert user id and password for NTLM authentication&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">HttpNtlmAuth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AuthManager.get_auth">
+<a class="viewcode-back" href="../../auth.html#qrs_api_client.auth.AuthManager.get_auth">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">,</span> <span class="n">auth_method</span><span class="o">=</span><span class="s2">&quot;certificate&quot;</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configures and returns the authentication for the specified method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            session (requests.Session): The session object to configure.</span>
+<span class="sd">            auth_method (str, optional): The authentication method to use (&#39;certificate&#39; or &#39;ntlm&#39;).</span>
+<span class="sd">            verify_ssl (bool or str, optional): Either a boolean for SSL verification or the path to a root.pem file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            requests.Session: The configured session object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If an unknown authentication method is specified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">auth_method</span> <span class="o">==</span> <span class="s2">&quot;certificate&quot;</span><span class="p">:</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">cert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_certificate_auth</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">auth_method</span> <span class="o">==</span> <span class="s2">&quot;ntlm&quot;</span><span class="p">:</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">auth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ntlm_auth</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown authentication method: </span><span class="si">{</span><span class="n">auth_method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># SSL-Root-Zertifikatsüberprüfung hinzufügen, falls angegeben</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_cert_path</span> <span class="ow">and</span> <span class="n">verify_ssl</span><span class="p">:</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">verify</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_cert_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">verify</span> <span class="o">=</span> <span class="n">verify_ssl</span>
+
+        <span class="k">return</span> <span class="n">session</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Rumen Vasilev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
