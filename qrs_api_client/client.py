@@ -108,6 +108,23 @@ class QRSClient:
             headers = {}
         return self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data)
 
+    def put(self, endpoint: str, params: str = None, headers: dict = None, data=None) -> dict:
+        """
+        Executes a PUT request to the QRS API.
+
+        Args:
+            endpoint (str): The API endpoint to call.
+            params (str, optional): Query parameters to include in the request.
+            headers (dict, optional): Additional header parameters.
+            data (dict or str, optional): The JSON payload to include in the request body.
+
+        Returns:
+            dict: JSON response as a dictionary or None if an error occurs.
+        """
+        if headers is None:
+            headers = {}
+        return self._request(method="PUT", endpoint=endpoint, params=params, headers=headers, data=data)
+
     def delete(self, endpoint: str, params: str = None) -> dict:
         """
         Executes a DELETE request to the QRS API.
