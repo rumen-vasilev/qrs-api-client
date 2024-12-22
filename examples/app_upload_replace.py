@@ -1,5 +1,4 @@
 from qrs_api_client.client import QRSClient
-import qrs_api_client.models as models
 from dotenv import load_dotenv
 import os
 
@@ -11,9 +10,9 @@ client = QRSClient(server_name=os.getenv("SERVER_NAME"), server_port=os.getenv("
                    auth_method="certificate", verify_ssl=True)
 
 # Calls the API
-app_upload = client.import_app(app_name="<app_name>", file_name="<path_to_certificates>/<file_name>.qvf")
+app_replace = client.app_upload_replace(target_app_id="<target_app_id>", file_name="<path_to_certificates>/<file_name>.qvf")
 
-if app_upload:
-    print("App uploaded:", app_upload)
+if app_replace:
+    print("App replaced:", app_replace)
 else:
     print("API request error.")

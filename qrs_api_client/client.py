@@ -4,6 +4,7 @@ import string
 from qrs_api_client.auth import AuthManager
 import qrs_api_client.models as models
 import json
+import uuid
 
 
 class QRSClient:
@@ -120,7 +121,7 @@ class QRSClient:
         """
         return self._request(method="DELETE", endpoint=endpoint, params=params)
 
-    def create_reload_task(self, app_id, task_name, custom_properties=None, tags: list = None,
+    def reloadtask_create(self, app_id, task_name, custom_properties=None, tags: list = None,
                            schema_events: list = None, composite_events: list = None) -> dict:
         """
         Creates a reload task for a specified app.
@@ -171,7 +172,7 @@ class QRSClient:
         # Execute API call
         return self.post(endpoint="reloadtask/create", data=payload)
 
-    def import_app(self, app_name, file_name):
+    def app_upload(self, app_name: str, file_name: str):
         """
         Executes a POST request to the QRS API.
 
@@ -185,3 +186,19 @@ class QRSClient:
         headers = {"Content-Type": "application/vnd.qlik.sense.app"}
         with open(file_name, 'rb') as payload:
             return self.post(endpoint="app/upload", params="name={0}".format(app_name), headers=headers, data=payload)
+
+    def app_upload_replace(self, target_app_id: uuid.UUID, file_name: str):
+        """
+        Executes a POST request to the QRS API.
+
+        Args:
+            target_app_id (UUID): The ID of the app to be replaced.
+            file_name (str): The path to the file.
+
+        Returns:
+            dict: JSON response as a dictionary.
+        """
+        headers = {"Content-Type": "application/vnd.qlik.sense.app"}
+        with open(file_name, 'rb') as payload:
+            return self.post(endpoint="app/upload/replace", params="targetappid={0}".format(target_app_id),
+                             headers=headers, data=payload)
