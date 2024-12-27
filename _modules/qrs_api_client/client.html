@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qrs_api_client.client &mdash; QRS API Client 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            QRS API Client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../client.html">QRS API Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">QRS API Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auth.html">QRS API Authentication</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QRS API Client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qrs_api_client.client</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qrs_api_client.client</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">qrs_api_client.auth</span> <span class="kn">import</span> <span class="n">AuthManager</span>
+<span class="kn">import</span> <span class="nn">qrs_api_client.models</span> <span class="k">as</span> <span class="nn">models</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+
+<div class="viewcode-block" id="QRSClient">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient">[docs]</a>
+<span class="k">class</span> <span class="nc">QRSClient</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Client for interacting with the Qlik Repository Service (QRS) API.</span>
+
+<span class="sd">    Provides methods for establishing a session and performing CRUD operations on QRS entities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">server_port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">auth_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">auth_manager</span><span class="p">:</span> <span class="n">AuthManager</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the QRSClient instance and establishes a session with the Qlik Sense Repository Service.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            server_name (str): The hostname or domain name of the server.</span>
+<span class="sd">            server_port (int): The port number of the server (e.g., 4242).</span>
+<span class="sd">            auth_manager (AuthManager): An instance of AuthManager for handling authentication.</span>
+<span class="sd">            auth_method (str): The authentication method to use (e.g., &quot;ntlm&quot; or &quot;cert&quot;).</span>
+<span class="sd">            verify_ssl (bool or str, optional): Boolean or path to a root.pem file for SSL verification.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xrf</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">server_name</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">server_port</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/qrs&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auth_method</span> <span class="o">=</span> <span class="n">auth_method</span>
+
+        <span class="c1"># Initialize authentication manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>  <span class="c1"># Initialize session</span>
+        <span class="k">if</span> <span class="n">auth_manager</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">auth_manager</span> <span class="o">=</span> <span class="n">AuthManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">auth_manager</span><span class="o">.</span><span class="n">get_auth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">auth_method</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes an HTTP request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            method (str): HTTP method to use (e.g., &quot;GET&quot;, &quot;POST&quot;, &quot;DELETE&quot;).</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            **kwargs: Additional arguments to pass to the request (e.g., params, data).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary or None if an error occurs.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            requests.exceptions.RequestException: If an error occurs during the API request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Construct the url</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://&quot;</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s2">?xrfkey=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">xrf</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="c1"># print(f&quot;Making request to: {url}&quot;)</span>
+
+        <span class="c1"># Construct the headers</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;X-Qlik-XrfKey&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">xrf</span><span class="p">,</span> <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;X-Qlik-User&quot;</span><span class="p">:</span> <span class="s2">&quot;UserDirectory=INTERNAL;UserID=sa_repository&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span> <span class="s2">&quot;Connection&quot;</span><span class="p">:</span> <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth_method</span> <span class="o">==</span> <span class="s2">&quot;ntlm&quot;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;User-Agent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36&quot;</span>
+            <span class="n">headers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;X-Qlik-User&quot;</span><span class="p">)</span>
+            <span class="c1"># self.headers = {&quot;X-Qlik-XrfKey&quot;: self.xrf, &quot;User-Agent&quot;: &quot;Windows&quot;}</span>
+
+        <span class="c1"># Merge the headers passed from another method</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;headers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">headers</span> <span class="o">|</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;headers&#39;</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;API request error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="QRSClient.get">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.get">[docs]</a>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a GET request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            params (str, optional): Query parameters to include in the request.</span>
+<span class="sd">            headers (dict, optional): Additional header parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.post">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.post">[docs]</a>
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a POST request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            params (str, optional): Query parameters to include in the request.</span>
+<span class="sd">            headers (dict, optional): Additional header parameters.</span>
+<span class="sd">            data (dict or str, optional): The JSON payload to include in the request body.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.put">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.put">[docs]</a>
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a PUT request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            params (str, optional): Query parameters to include in the request.</span>
+<span class="sd">            headers (dict, optional): Additional header parameters.</span>
+<span class="sd">            data (dict or str, optional): The JSON payload to include in the request body.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.delete">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.delete">[docs]</a>
+    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a DELETE request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            params (str, optional): Query parameters to include in the request.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.reloadtask_create">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.reloadtask_create">[docs]</a>
+    <span class="k">def</span> <span class="nf">reloadtask_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">custom_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">schema_events</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">composite_events</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a reload task for a specified app.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_id (str): The ID of the app for which the task is created.</span>
+<span class="sd">            task_name (str): The name of the reload task to create.</span>
+<span class="sd">            custom_properties (dict, optional): Dictionary of custom property IDs and their values.</span>
+<span class="sd">            tags (list, optional): List of tag IDs to associate with the task.</span>
+<span class="sd">            schema_events (list, optional): List of schema events to schedule the task.</span>
+<span class="sd">            composite_events (list, optional): List of composite events to schedule the task.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response from the API or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create app reference</span>
+        <span class="n">app_condensed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">app_condensed</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">app_id</span><span class="p">)</span>
+
+        <span class="c1"># Prepare custom properties</span>
+        <span class="n">custom_property_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">custom_properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">custom_property_id</span><span class="p">,</span> <span class="n">custom_property_values</span> <span class="ow">in</span> <span class="n">custom_properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">custom_property_definition_condensed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">custom_property_definition_condensed</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">custom_property_id</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">custom_property_values</span><span class="p">:</span>
+                    <span class="n">custom_property_value</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">custom_property_value</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+                                                                         <span class="n">definition</span><span class="o">=</span><span class="n">custom_property_definition_condensed</span><span class="p">)</span>
+                    <span class="n">custom_property_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_property_value</span><span class="p">)</span>
+
+        <span class="c1"># Prepare tags</span>
+        <span class="n">tag_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+                <span class="n">tag_condensed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">tag_condensed</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
+                <span class="n">tag_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag_condensed</span><span class="p">)</span>
+
+        <span class="c1"># Construct reload task</span>
+        <span class="n">reload_task</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">reload_task</span><span class="p">(</span><span class="n">custom_properties</span><span class="o">=</span><span class="n">custom_property_list</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">task_name</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tag_list</span><span class="p">,</span>
+                                         <span class="n">app</span><span class="o">=</span><span class="n">app_condensed</span><span class="p">)</span>
+
+        <span class="c1"># Construct reload task bundle</span>
+        <span class="n">reload_task_bundle</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">reload_task_bundle</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">reload_task</span><span class="p">,</span> <span class="n">composite_events</span><span class="o">=</span><span class="n">composite_events</span><span class="p">,</span>
+                                                       <span class="n">schema_events</span><span class="o">=</span><span class="n">schema_events</span><span class="p">)</span>
+
+        <span class="c1"># Serialize payload to JSON</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">reload_task_bundle</span><span class="p">)</span>
+
+        <span class="c1"># Execute API call</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;reloadtask/create&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.app_upload">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_upload">[docs]</a>
+    <span class="k">def</span> <span class="nf">app_upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a POST request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_name (str): The name of the app after upload.</span>
+<span class="sd">            file_name (str): The path to the file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/vnd.qlik.sense.app&quot;</span><span class="p">}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;app/upload&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="s2">&quot;name=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_name</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.app_upload_replace">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_upload_replace">[docs]</a>
+    <span class="k">def</span> <span class="nf">app_upload_replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_app_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a POST request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_app_id (UUID): The ID of the app to be replaced.</span>
+<span class="sd">            file_name (str): The path to the file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/vnd.qlik.sense.app&quot;</span><span class="p">}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;app/upload/replace&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="s2">&quot;targetappid=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target_app_id</span><span class="p">),</span>
+                             <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Rumen Vasilev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
