@@ -50,12 +50,12 @@ composite_event_2 = models.composite_event(name="Composite Event 2", event_type=
 composite_events = [composite_event_1, composite_event_2]
 
 # Creating reload task
-create_reload_task = client.create_reload_task(app_id="4cb45d72-1428-410b-a36d-208f9fdc59cb",
+reloadtask_create = client.reloadtask_create(app_id="4cb45d72-1428-410b-a36d-208f9fdc59cb",
                                                     task_name="API generated reload task",
                                                     custom_properties=custom_properties, tags=tags,
                                                     composite_events=composite_events, schema_events=schema_events)
 
-if create_reload_task:
-    print("Reload task created:", create_reload_task)
+if reloadtask_create:
+    print("Reload task created:", reloadtask_create)
 else:
     print("API request error.")
