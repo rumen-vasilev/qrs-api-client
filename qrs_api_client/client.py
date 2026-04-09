@@ -5,6 +5,7 @@ from qrs_api_client.auth import AuthManager
 import qrs_api_client.models as models
 import json
 import uuid
+from datetime import datetime
 
 
 class QRSClient:
@@ -139,7 +140,12 @@ class QRSClient:
         return self._request(method="DELETE", endpoint=endpoint, params=params)
 
     def reloadtask_create(self, app_id, task_name, custom_properties=None, tags: list = None,
-                           schema_events: list = None, composite_events: list = None) -> dict:
+                          created_date: datetime = None, modified_date: datetime = None,
+                          modified_by_user_name: str = None, schema_events: list = None, composite_events: list = None,
+                          schema_path: str = None, privileges: list = None, task_type: int = None, enabled: bool = None,
+                          task_session_timeout: int = None, max_retries: int = None, is_manually_triggered: bool = None,
+                          operational=None, is_partial_reload: bool = None, time_to_live: int = None,
+                          preload_nodes=None) -> dict:
         """
         Creates a reload task for a specified app.
 
@@ -150,10 +156,17 @@ class QRSClient:
             tags (list, optional): List of tag IDs to associate with the task.
             schema_events (list, optional): List of schema events to schedule the task.
             composite_events (list, optional): List of composite events to schedule the task.
+            schema_path (str, optional): Schema path.
+            privileges (list, optional): Privileges.
+            task_type (int, optional): Task type. Default value is 0.
+            enabled (bool, optional): True, if the task is active. Default value is True.
 
         Returns:
             dict: JSON response from the API or None if an error occurs.
         """
+        # # Initialize mutable default arguments
+        # if privileges is None:
+        #     privileges = []
 
         # Create app reference
         app_condensed = models.app_condensed(_id=app_id)
@@ -177,7 +190,13 @@ class QRSClient:
 
         # Construct reload task
         reload_task = models.reload_task(custom_properties=custom_property_list, name=task_name, tags=tag_list,
-                                         app=app_condensed)
+                                         app=app_condensed, created_date=created_date, modified_date=modified_date,
+                                         modified_by_user_name=modified_by_user_name, schema_path=schema_path,
+                                         privileges=privileges, task_type=task_type, enabled=enabled,
+                                         task_session_timeout=task_session_timeout, max_retries=max_retries,
+                                         is_manually_triggered=is_manually_triggered, operational=operational,
+                                         is_partial_reload=is_partial_reload, time_to_live=time_to_live,
+                                         preload_nodes=preload_nodes)
 
         # Construct reload task bundle
         reload_task_bundle = models.reload_task_bundle(task=reload_task, composite_events=composite_events,
