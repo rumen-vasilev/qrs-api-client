@@ -47,24 +47,19 @@ class QRSClient:
             method (str): HTTP method to use (e.g., "GET", "POST", "DELETE").
             endpoint (str): The API endpoint to call.
             **kwargs: Additional arguments to pass to the request (e.g., params, data).
+                      params should be a dict (e.g., {"skipData": "false"}) or None.
 
         Returns:
-            dict: JSON response as a dictionary or None if an error occurs.
-
-        Raises:
-            requests.exceptions.RequestException: If an error occurs during the API request.
+            requests.Response: Response object or None if an error occurs.
         """
-        if kwargs['params'] is None:
-            query_params = f"?Xrfkey={self.xrf}"
-        else:
-            query_params = f"?Xrfkey={self.xrf}&{kwargs['params']}"
-
-        # Remove params from kwargs so requests doesn't append them a second time
-        kwargs.pop('params', None)
+        # Build query parameters — Xrfkey is always required
+        params = kwargs.get('params') or {}
+        params['Xrfkey'] = self.xrf
+        kwargs['params'] = params
 
         # Construct the url
-        url = "https://" + f"{self.server}{endpoint}{query_params}"
-        print(f"Making request to: {url}")
+        url = f"https://{self.server}{endpoint}"
+        print(f"Making request to: {url} | params: {params}")
 
         # Construct the headers
         headers = {"X-Qlik-Xrfkey": self.xrf, "Accept": "application/json",
@@ -73,10 +68,9 @@ class QRSClient:
         if self.auth_method == "ntlm":
             headers['User-Agent'] = "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
             headers.pop("X-Qlik-User")
-            # self.headers = {"X-Qlik-Xrfkey": self.xrf, "User-Agent": "Windows"}
 
         # Merge the headers passed from another method
-        kwargs['headers'] = headers | kwargs['headers']
+        kwargs['headers'] = headers | kwargs.get('headers', {})
 
         try:
             response = self.session.request(method, url, **kwargs)
@@ -86,13 +80,13 @@ class QRSClient:
             print(f"API request error: {e}")
             return None
 
-    def get(self, endpoint: str, params: str = None, headers: dict = None) -> dict:
+    def get(self, endpoint: str, params: dict = None, headers: dict = None) -> dict:
         """
         Executes a GET request to the QRS API.
 
         Args:
             endpoint (str): The API endpoint to call.
-            params (str, optional): Query parameters to include in the request.
+            params (dict, optional): Query parameters as key-value pairs.
             headers (dict, optional): Additional header parameters.
 
         Returns:
@@ -105,13 +99,13 @@ class QRSClient:
             return None
         return response.json()
 
-    def post(self, endpoint: str, params: str = None, headers: dict = None, data=None) -> dict:
+    def post(self, endpoint: str, params: dict = None, headers: dict = None, data=None) -> dict:
         """
         Executes a POST request to the QRS API.
 
         Args:
             endpoint (str): The API endpoint to call.
-            params (str, optional): Query parameters to include in the request.
+            params (dict, optional): Query parameters as key-value pairs.
             headers (dict, optional): Additional header parameters.
             data (dict or str, optional): The JSON payload to include in the request body.
 
@@ -125,15 +119,13 @@ class QRSClient:
             return None
         return response.json()
 
-    def put(self, endpoint: str, params: str = None, headers: dict = None, data=None) -> dict:
+    def put(self, endpoint: str, params: dict = None, headers: dict = None, data=None) -> dict:
         """
         Executes a PUT request to the QRS API.
 
         Args:
             endpoint (str): The API endpoint to call.
-            params (str, optional): Query parameters to include in the request.
-            headers (dict, optional): Additional header parameters.
-            data (dict or str, optional): The JSON payload to include in the request body.
+            params (dict, optional): Query parameters as key-value pairs.
 
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
@@ -145,13 +137,13 @@ class QRSClient:
             return None
         return response.json()
 
-    def delete(self, endpoint: str, params: str = None) -> dict:
+    def delete(self, endpoint: str, params: dict = None) -> dict:
         """
         Executes a DELETE request to the QRS API.
 
         Args:
             endpoint (str): The API endpoint to call.
-            params (str, optional): Query parameters to include in the request.
+            params (dict, optional): Query parameters as key-value pairs.
 
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
@@ -183,8 +175,7 @@ class QRSClient:
         ################################################################################################################
         export_token = str(uuid.uuid4())
         path = '/qrs/app/{0}/export/{1}'.format(app_id, export_token)
-        # query = 'skipData={0}'.format(str(skip_data).lower())
-        query = 'skipData={0}'.format(skip_data)
+        query = {"skipData": skip_data}
         data = self.post(endpoint=path, params=query)
         # data = self._request(method="GET", endpoint=path, params=query, headers={})
         if data is None:
@@ -197,7 +188,7 @@ class QRSClient:
         download_path = data.get('downloadPath', '')
         parsed = urlparse(download_path)
         path_part = parsed.path
-        query_part = parsed.query
+        query_dict = dict(pair.split('=', 1) for pair in parsed.query.split('&') if '=' in pair) if parsed.query else {}
         if file_name is None:
             # Extract file name
             file_name = os.path.basename(path_part)
@@ -208,7 +199,7 @@ class QRSClient:
         headers = {"Content-Type": "application/vnd.qlik.sense.app"}
 
         try:
-            response = self._request(method="GET", endpoint=path_part, params=query_part, headers=headers, stream=True)
+            response = self._request(method="GET", endpoint=path_part, params=query_dict, headers=headers, stream=True)
             with open(file_path + "/" + file_name, "wb") as file:
                 for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
@@ -232,7 +223,7 @@ class QRSClient:
         """
         headers = {"Content-Type": "application/vnd.qlik.sense.app"}
         with open(file_name, 'rb') as payload:
-            return self.post(endpoint="/qrs/app/upload", params="name={0}".format(app_name), headers=headers, data=payload)
+            return self.post(endpoint="/qrs/app/upload", params={"name": app_name}, headers=headers, data=payload)
 
     def app_upload_replace(self, target_app_id: uuid.UUID, file_name: str):
         """
@@ -247,7 +238,7 @@ class QRSClient:
         """
         headers = {"Content-Type": "application/vnd.qlik.sense.app"}
         with open(file_name, 'rb') as payload:
-            return self.post(endpoint="/qrs/app/upload/replace", params="targetappid={0}".format(target_app_id),
+            return self.post(endpoint="/qrs/app/upload/replace", params={"targetappid": str(target_app_id)},
                              headers=headers, data=payload)
 
     def reloadtask_create(self, app_id, task_name, custom_properties=None, tags: list = None,
