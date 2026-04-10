@@ -1,3 +1,4 @@
+import os
 import requests
 import random
 import string
@@ -6,6 +7,7 @@ import qrs_api_client.models as models
 import json
 import uuid
 from datetime import datetime
+from urllib.parse import urlparse, unquote
 
 
 class QRSClient:
@@ -28,7 +30,7 @@ class QRSClient:
         """
         self.xrf = ''.join(random.sample(string.ascii_letters + string.digits, 16))
 
-        self.server = server_name + ":" + str(server_port) + "/qrs"
+        self.server = server_name + ":" + str(server_port) #+ "/qrs"
         self.auth_method = auth_method
 
         # Initialize authentication manager
@@ -37,7 +39,7 @@ class QRSClient:
             auth_manager = AuthManager()
         self.session = auth_manager.get_auth(self.session, auth_method, verify_ssl)
 
-    def _request(self, method: str, endpoint: str, **kwargs) -> dict:
+    def _request(self, method: str, endpoint: str, **kwargs):
         """
         Executes an HTTP request to the QRS API.
 
@@ -52,18 +54,26 @@ class QRSClient:
         Raises:
             requests.exceptions.RequestException: If an error occurs during the API request.
         """
+        if kwargs['params'] is None:
+            query_params = f"?Xrfkey={self.xrf}"
+        else:
+            query_params = f"?Xrfkey={self.xrf}&{kwargs['params']}"
+
+        # Remove params from kwargs so requests doesn't append them a second time
+        kwargs.pop('params', None)
+
         # Construct the url
-        url = "https://" + f"{self.server}/{endpoint}?xrfkey={self.xrf}"
-        # print(f"Making request to: {url}")
+        url = "https://" + f"{self.server}{endpoint}{query_params}"
+        print(f"Making request to: {url}")
 
         # Construct the headers
-        headers = {"X-Qlik-XrfKey": self.xrf, "Accept": "application/json",
+        headers = {"X-Qlik-Xrfkey": self.xrf, "Accept": "application/json",
                    "X-Qlik-User": "UserDirectory=INTERNAL;UserID=sa_repository",
                    "Content-Type": "application/json", "Connection": "Keep-Alive"}
         if self.auth_method == "ntlm":
             headers['User-Agent'] = "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
             headers.pop("X-Qlik-User")
-            # self.headers = {"X-Qlik-XrfKey": self.xrf, "User-Agent": "Windows"}
+            # self.headers = {"X-Qlik-Xrfkey": self.xrf, "User-Agent": "Windows"}
 
         # Merge the headers passed from another method
         kwargs['headers'] = headers | kwargs['headers']
@@ -71,7 +81,7 @@ class QRSClient:
         try:
             response = self.session.request(method, url, **kwargs)
             response.raise_for_status()
-            return response.json()
+            return response
         except requests.exceptions.RequestException as e:
             print(f"API request error: {e}")
             return None
@@ -90,7 +100,10 @@ class QRSClient:
         """
         if headers is None:
             headers = {}
-        return self._request(method="GET", endpoint=endpoint, params=params, headers=headers)
+        response = self._request(method="GET", endpoint=endpoint, params=params, headers=headers)
+        if response is None:
+            return None
+        return response.json()
 
     def post(self, endpoint: str, params: str = None, headers: dict = None, data=None) -> dict:
         """
@@ -107,7 +120,10 @@ class QRSClient:
         """
         if headers is None:
             headers = {}
-        return self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data)
+        response = self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data)
+        if response is None:
+            return None
+        return response.json()
 
     def put(self, endpoint: str, params: str = None, headers: dict = None, data=None) -> dict:
         """
@@ -124,7 +140,10 @@ class QRSClient:
         """
         if headers is None:
             headers = {}
-        return self._request(method="PUT", endpoint=endpoint, params=params, headers=headers, data=data)
+        response = self._request(method="PUT", endpoint=endpoint, params=params, headers=headers, data=data)
+        if response is None:
+            return None
+        return response.json()
 
     def delete(self, endpoint: str, params: str = None) -> dict:
         """
@@ -137,7 +156,99 @@ class QRSClient:
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
         """
-        return self._request(method="DELETE", endpoint=endpoint, params=params)
+        response = self._request(method="DELETE", endpoint=endpoint, params=params, headers={})
+        if response is None:
+            return None
+        return response.json()
+
+    def app_export(self, app_id: uuid.UUID, file_path: str, file_name: str = None, skip_data: bool = False):
+        """
+        Exports an app in a two-step process using POST and GET methods.
+
+        Step 1: POST to /qrs/app/{id}/export/{token} to trigger the export.
+                The API returns JSON with a 'downloadPath' field.
+        Step 2: GET the downloadPath to download the binary .qvf file.
+
+        Args:
+            app_id (UUID): The ID of the app to be exported.
+            file_path (str): The directory path where the exported app should be stored.
+            file_name (str, optional): File name for the exported app (e.g., "MyApp.qvf"). Falls kein Wert übergeben
+            wurde, wird der ursprüngliche Name der Datei genommen.
+
+        Returns:
+            str: Success message with file name and path, or None if an error occurs.
+        """
+        ################################################################################################################
+        # Step 1: Trigger the export on the Sense Enterprise Server.
+        ################################################################################################################
+        export_token = str(uuid.uuid4())
+        path = '/qrs/app/{0}/export/{1}'.format(app_id, export_token)
+        # query = 'skipData={0}'.format(str(skip_data).lower())
+        query = 'skipData={0}'.format(skip_data)
+        data = self.post(endpoint=path, params=query)
+        # data = self._request(method="GET", endpoint=path, params=query, headers={})
+        if data is None:
+            print("Export request failed.")
+            return None
+
+        ################################################################################################################
+        # Step 2: Download the .qvf file.
+        ################################################################################################################
+        download_path = data.get('downloadPath', '')
+        parsed = urlparse(download_path)
+        path_part = parsed.path
+        query_part = parsed.query
+        if file_name is None:
+            # Extract file name
+            file_name = os.path.basename(path_part)
+            # Decode URL-Encoding
+            file_name = unquote(file_name)
+
+        # Complete header for the download request
+        headers = {"Content-Type": "application/vnd.qlik.sense.app"}
+
+        try:
+            response = self._request(method="GET", endpoint=path_part, params=query_part, headers=headers, stream=True)
+            with open(file_path + "/" + file_name, "wb") as file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        file.write(chunk)
+            return 'Application: {0} written to {1}'.format(file_name, file_path)
+
+        except requests.exceptions.RequestException as e:
+            print(f"Download error: {e}")
+            return None
+
+    def app_upload(self, app_name: str, file_name: str):
+        """
+        Executes a POST request to the QRS API.
+
+        Args:
+            app_name (str): The name of the app after upload.
+            file_name (str): The path to the file.
+
+        Returns:
+            dict: JSON response as a dictionary.
+        """
+        headers = {"Content-Type": "application/vnd.qlik.sense.app"}
+        with open(file_name, 'rb') as payload:
+            return self.post(endpoint="/qrs/app/upload", params="name={0}".format(app_name), headers=headers, data=payload)
+
+    def app_upload_replace(self, target_app_id: uuid.UUID, file_name: str):
+        """
+        Executes a POST request to the QRS API.
+
+        Args:
+            target_app_id (UUID): The ID of the app to be replaced.
+            file_name (str): The path to the file.
+
+        Returns:
+            dict: JSON response as a dictionary.
+        """
+        headers = {"Content-Type": "application/vnd.qlik.sense.app"}
+        with open(file_name, 'rb') as payload:
+            return self.post(endpoint="/qrs/app/upload/replace", params="targetappid={0}".format(target_app_id),
+                             headers=headers, data=payload)
 
     def reloadtask_create(self, app_id, task_name, custom_properties=None, tags: list = None,
                           created_date: datetime = None, modified_date: datetime = None,
@@ -206,35 +317,4 @@ class QRSClient:
         payload = json.dumps(reload_task_bundle)
 
         # Execute API call
-        return self.post(endpoint="reloadtask/create", data=payload)
-
-    def app_upload(self, app_name: str, file_name: str):
-        """
-        Executes a POST request to the QRS API.
-
-        Args:
-            app_name (str): The name of the app after upload.
-            file_name (str): The path to the file.
-
-        Returns:
-            dict: JSON response as a dictionary.
-        """
-        headers = {"Content-Type": "application/vnd.qlik.sense.app"}
-        with open(file_name, 'rb') as payload:
-            return self.post(endpoint="app/upload", params="name={0}".format(app_name), headers=headers, data=payload)
-
-    def app_upload_replace(self, target_app_id: uuid.UUID, file_name: str):
-        """
-        Executes a POST request to the QRS API.
-
-        Args:
-            target_app_id (UUID): The ID of the app to be replaced.
-            file_name (str): The path to the file.
-
-        Returns:
-            dict: JSON response as a dictionary.
-        """
-        headers = {"Content-Type": "application/vnd.qlik.sense.app"}
-        with open(file_name, 'rb') as payload:
-            return self.post(endpoint="app/upload/replace", params="targetappid={0}".format(target_app_id),
-                             headers=headers, data=payload)
+        return self.post(endpoint="/qrs/reloadtask/create", data=payload)
