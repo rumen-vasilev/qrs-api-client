@@ -1,13 +1,16 @@
 from qrs_api_client.client import QRSClient
 import qrs_api_client.models as models
-from dotenv import load_dotenv
-import os
+from qrs_api_client.auth import AuthManager
 
-# Loads environment variables from .env file.
-load_dotenv()
 
-# Authenticates on the enterprise server (Cert paths are called from the .env file)
-client = QRSClient(server_name=os.getenv("SERVER_NAME"), server_port=os.getenv("SERVER_PORT"),
+# Inserts certificates into the authentication manager
+auth_manager = AuthManager(
+    cert_path="<path_to_certificates>/client.pem",
+    key_path="<path_to_certificates>/client_key.pem",
+    root_cert_path="<path_to_certificates>/root.pem")
+
+# Authenticates on the enterprise server
+client = QRSClient(server_name="<server_name>", server_port=4242, auth_manager=auth_manager,
                    auth_method="certificate", verify_ssl=True)
 
 

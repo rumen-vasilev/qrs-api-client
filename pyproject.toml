@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qrs-api-client"
+version = "3.0.0"
+description = "Python client for Qlik Sense Repository Service API."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Rumen Vasilev", email = "rumen.vasilev@gmail.com" }
+]
+keywords = ["qlik", "qlik-sense", "qrs", "api", "client"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "requests>=2.32.3",
+]
+
+[project.optional-dependencies]
+ntlm = ["requests_ntlm>=1.2.0"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "build>=1.0",
+    "twine>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/rumen-vasilev/qrs-api-client"
+Documentation = "https://rumen-vasilev.github.io/qrs-api-client/"
+Repository = "https://github.com/rumen-vasilev/qrs-api-client"
+Issues = "https://github.com/rumen-vasilev/qrs-api-client/issues"
+
+[tool.setuptools.packages.find]
+include = ["qrs_api_client*"]
+exclude = ["examples*", "docs*", "tests*"]

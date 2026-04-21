@@ -1,121 +1,148 @@
 # qrs-api-client (Qlik Sense Repository API Client)
+
 Python client for [Qlik Sense Repository Service API](https://help.qlik.com/en-US/sense-developer/November2024/Subsystems/RepositoryServiceAPI/Content/Sense_RepositoryServiceAPI/RepositoryServiceAPI-Introduction.htm).
 
-Forked from [clintcarr/qrspy](https://github.com/clintcarr/qrspy)
+Forked from [clintcarr/qrspy](https://github.com/clintcarr/qrspy).
 
 ## Requirements
-* Python 3.6+
-* requests>=2.32.3
-* requests_ntlm>=1.2.0
-* python-dotenv>=1.0.0
+
+* Python 3.9+
+* `requests >= 2.32.3`
+
+Optional:
+* `requests_ntlm >= 1.2.0` — only required for NTLM authentication
 
 ## Installation
+
 ```bash
+# Minimal install (certificate authentication only)
 pip install qrs-api-client
+
+# With NTLM authentication support
+pip install qrs-api-client[ntlm]
 ```
 
-## Configuration
-You can optionally put the authentication data into an .env file. Just create it in your project folder and initialize
-the variables listed below.
-```dotenv
-CERT_PATH="qlik_certs/client.pem"
-KEY_PATH="qlik_certs/client_key.pem"
-ROOT_CERT_PATH="qlik_certs/root.pem"
-SERVER_NAME="<server name>"
-SERVER_PORT=4242
-USER_ID="<DOMAIN>\\<user_id>"
-PASSWORD="<insert password>"
-```
+## Connecting using certificates
 
+Export the Qlik Sense certificates in PEM format from the Qlik Sense Enterprise server to a local folder before running the code.
 
-## Connecting to Qlik Sense Enterprise Server using certificates
-You need to export the Qlik Sense certificates in PEM format from the Qlik Sense Enterprise server to a local folder in 
-order to authenticate on the server.
-
-### Authentication without .env file
 ```python
-from qrs_api_client.client import QRSClient
-from qrs_api_client.auth import AuthManager
+from qrs_api_client import QRSClient, AuthManager
 
-# Inserts certificates into the authentication manager
 auth_manager = AuthManager(
     cert_path="<path_to_certificates>/client.pem",
     key_path="<path_to_certificates>/client_key.pem",
-    root_cert_path="<path_to_certificates>/root.pem")
+    root_cert_path="<path_to_certificates>/root.pem",
+)
 
-# Authenticates on the enterprise server
-client = QRSClient(server_name="<server_name>", server_port=4242, auth_manager=auth_manager,
-                   auth_method="certificate", verify_ssl=True)
+client = QRSClient(
+    server_name="<server_name>",
+    server_port=4242,
+    auth_manager=auth_manager,
+    auth_method="certificate",
+    verify_ssl=True,
+)
 
-# Calls the API
-api_desc_post = client.get("about/api/description", "extended=false&method=POST")
-if api_desc_post:
-    print(api_desc_post)
+about = client.get("/qrs/about/api/description", {"extended": "false", "method": "POST"})
+if about:
+    print(about)
 else:
     print("API request error.")
 ```
 
-### Authentication with .env file
-```python
-from qrs_api_client.client import QRSClient
-from dotenv import load_dotenv
-import os
+## Connecting using NTLM
 
-# Loads environment variables from .env file.
+Install with the `ntlm` extra: `pip install qrs-api-client[ntlm]`.
+
+```python
+from qrs_api_client import QRSClient, AuthManager
+
+auth_manager = AuthManager(
+    user_id="<DOMAIN>\\<user_id>",
+    password="<password>",
+    root_cert_path="<path_to_certificates>/root.pem",
+)
+
+client = QRSClient(
+    server_name="<server_name>",
+    server_port=443,
+    auth_manager=auth_manager,
+    auth_method="ntlm",
+    verify_ssl=False,
+)
+
+about = client.get("/qrs/about/api/description", {"extended": "false", "method": "POST"})
+print(about)
+```
+
+## Loading configuration from environment variables or .env files
+
+`qrs-api-client` does not load any configuration automatically. This keeps it a clean, predictable library — you are in full control of where credentials come from.
+
+A common pattern is to store credentials in environment variables or a `.env` file and load them in your own application code:
+
+```bash
+pip install python-dotenv
+```
+
+```dotenv
+# .env in your project folder (add this to .gitignore!)
+QLIK_CERT_PATH=/path/to/client.pem
+QLIK_KEY_PATH=/path/to/client_key.pem
+QLIK_ROOT_CERT_PATH=/path/to/root.pem
+QLIK_SERVER_NAME=qliksense.example.com
+QLIK_SERVER_PORT=4242
+```
+
+```python
+import os
+from dotenv import load_dotenv
+from qrs_api_client import QRSClient, AuthManager
+
 load_dotenv()
 
-# Authenticates on the enterprise server (Cert paths are called from the .env file)
-client = QRSClient(server_name=os.getenv("SERVER_NAME"), server_port=os.getenv("SERVER_PORT"),
-                   auth_method="certificate", verify_ssl=True)
+auth_manager = AuthManager(
+    cert_path=os.environ["QLIK_CERT_PATH"],
+    key_path=os.environ["QLIK_KEY_PATH"],
+    root_cert_path=os.environ["QLIK_ROOT_CERT_PATH"],
+)
 
-# Calls the API
-api_desc_post = client.get("about/api/description", "extended=false&method=POST")
-if api_desc_post:
-    print(api_desc_post)
-else:
-    print("API request error.")
+client = QRSClient(
+    server_name=os.environ["QLIK_SERVER_NAME"],
+    server_port=int(os.environ["QLIK_SERVER_PORT"]),
+    auth_manager=auth_manager,
+    auth_method="certificate",
+    verify_ssl=True,
+)
 ```
 
-## Connecting to Qlik Sense Enterprise Server using NTLM
+Any other config source (Vault, AWS Secrets Manager, YAML files, command-line arguments) works the same way — just pass the values into `AuthManager()` and `QRSClient()`.
 
-### Authentication without .env file
+## Query parameters: dict or string
+
+The HTTP methods accept `params` as a `dict`:
+
 ```python
-from qrs_api_client.client import QRSClient
-from qrs_api_client.auth import AuthManager
-
-# Inserts credentials into the authentication manager
-auth_manager = AuthManager(user_id="<DOMAIN>\\<user_id>", password="<password>",
-                           root_cert_path="<path_to_certificates>/root.pem")
-
-# Authenticates on the enterprise server
-client = QRSClient(server_name="<server_name>", server_port=443, auth_manager=auth_manager,
-                   auth_method="ntlm", verify_ssl=False)
-
-# Calls the API
-api_desc_post = client.get("about/api/description", "extended=false&method=POST")
-if api_desc_post:
-    print(api_desc_post)
-else:
-    print("API request error.")
+client.get("/qrs/about", {"extended": "false"})
 ```
 
-### Authentication with .env file
+## Logging
+
+The client uses the standard `logging` module under the name `qrs_api_client.client`. To see debug output:
+
 ```python
-from qrs_api_client.client import QRSClient
-
-# Authenticates on the enterprise server
-client = QRSClient(server_name="<server_name>", server_port=443, auth_method="ntlm", verify_ssl=False)
-
-# Calls the API
-api_desc_post = client.get("about/api/description", "extended=false&method=POST")
-if api_desc_post:
-    print(api_desc_post)
-else:
-    print("API request error.")
+import logging
+logging.basicConfig(level=logging.DEBUG)
 ```
 
 ## Examples of usage
-Please click on this [link](https://github.com/rumen-vasilev/qrs-api-client/tree/master/examples) to find examples of usage of this client.
+
+See the [examples folder](https://github.com/rumen-vasilev/qrs-api-client/tree/master/examples).
 
 ## Documentation
-Please click on this [link](https://rumen-vasilev.github.io/qrs-api-client/) for full API reference documentation.
+
+Full API reference: [https://rumen-vasilev.github.io/qrs-api-client/](https://rumen-vasilev.github.io/qrs-api-client/)
+
+## License
+
+MIT — see [LICENSE](LICENSE).

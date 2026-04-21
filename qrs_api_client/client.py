@@ -1,13 +1,22 @@
+"""
+QRS API Client for Qlik Sense Enterprise.
+"""
 import os
-import requests
 import random
 import string
-from qrs_api_client.auth import AuthManager
-import qrs_api_client.models as models
 import json
 import uuid
+import logging
 from datetime import datetime
 from urllib.parse import urlparse, unquote
+
+import requests
+
+from qrs_api_client.auth import AuthManager
+import qrs_api_client.models as models
+
+
+logger = logging.getLogger(__name__)
 
 
 class QRSClient:
@@ -59,7 +68,6 @@ class QRSClient:
 
         # Construct the url
         url = f"https://{self.server}{endpoint}"
-        print(f"Making request to: {url} | params: {params}")
 
         # Construct the headers
         headers = {"X-Qlik-Xrfkey": self.xrf, "Accept": "application/json",
@@ -72,13 +80,20 @@ class QRSClient:
         # Merge the headers passed from another method
         kwargs['headers'] = headers | kwargs.get('headers', {})
 
+        logger.debug("QRS request: %s %s params=%s", method, url, params)
+
         try:
             response = self.session.request(method, url, **kwargs)
             response.raise_for_status()
             return response
         except requests.exceptions.RequestException as e:
-            print(f"API request error: {e}")
+            logger.error("QRS request failed: %s", e)
             return None
+
+
+    # ---------------------------------------------------------------------------------------------------------------- #
+    # Generic HTTP methods                                                                                             #
+    # ---------------------------------------------------------------------------------------------------------------- #
 
     def get(self, endpoint: str, params: dict = None, headers: dict = None) -> dict:
         """
@@ -153,6 +168,11 @@ class QRSClient:
             return None
         return response.json()
 
+
+    # ---------------------------------------------------------------------------------------------------------------- #
+    # High-level convenience methods                                                                                   #
+    # ---------------------------------------------------------------------------------------------------------------- #
+
     def app_export(self, app_id: uuid.UUID, file_path: str, file_name: str = None, skip_data: bool = False):
         """
         Exports an app in a two-step process using POST and GET methods.
@@ -179,7 +199,7 @@ class QRSClient:
         data = self.post(endpoint=path, params=query)
         # data = self._request(method="GET", endpoint=path, params=query, headers={})
         if data is None:
-            print("Export request failed.")
+            logger.error("Export request failed for app %s", app_id)
             return None
 
         ################################################################################################################
@@ -207,7 +227,7 @@ class QRSClient:
             return 'Application: {0} written to {1}'.format(file_name, file_path)
 
         except requests.exceptions.RequestException as e:
-            print(f"Download error: {e}")
+            logger.error("Download error: %s", e)
             return None
 
     def app_upload(self, app_name: str, file_name: str):

@@ -18,8 +18,8 @@ client = QRSClient(server_name="<server_name>", server_port=4242, auth_manager=a
                    auth_method="certificate", verify_ssl=True)
 
 # Calls the API
-api_desc_post = client.get(endpoint="/qrs/about/api/description", params={"extended": "false", "method": "POST"})
-if api_desc_post:
-    print(api_desc_post)
+result = client.get(endpoint="/qrs/about/api/description", params={"extended": "false", "method": "POST"})
+if result:
+    print(result)
 else:
     print("API request error.")
