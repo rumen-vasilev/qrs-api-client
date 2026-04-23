@@ -14,9 +14,10 @@ client = QRSClient(server_name="<server_name>", server_port=4242, auth_manager=a
                    auth_method="certificate", verify_ssl=True)
 
 target_app_id = uuid.UUID("<target_app_id>")
+file=r"<file_path/file_name>"
 
 # Calls the API
-result = client.app_upload_replace(target_app_id=target_app_id, file_name="<path_to_file>/<file_name>.qvf")
+result = client.app_upload_replace(target_app_id=target_app_id, file_name=file)
 
 if result:
     print("App replaced:", result)

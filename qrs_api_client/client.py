@@ -230,35 +230,38 @@ class QRSClient:
             logger.error("Download error: %s", e)
             return None
 
-    def app_upload(self, app_name: str, file_name: str):
+    def app_upload(self, app_name: str, file_name: str, keep_data: bool = True, exclude_connections: bool = False):
         """
         Executes a POST request to the QRS API.
 
         Args:
             app_name (str): The name of the app after upload.
             file_name (str): The path to the file.
+            exclude_connections (bool, optional): If set to true and the uploaded .qvf file contains any data connections, they will not be imported to the system. The default value is false.
+            keep_data (bool, optional): If set to false and the uploaded .qvf file contains app data, the data will be silently discarded. The default value is true.
 
         Returns:
             dict: JSON response as a dictionary.
         """
         headers = {"Content-Type": "application/vnd.qlik.sense.app"}
         with open(file_name, 'rb') as payload:
-            return self.post(endpoint="/qrs/app/upload", params={"name": app_name}, headers=headers, data=payload)
+            return self.post(endpoint="/qrs/app/upload", params={"name": app_name, "keepdata": keep_data, "excludeconnections": exclude_connections}, headers=headers, data=payload)
 
-    def app_upload_replace(self, target_app_id: uuid.UUID, file_name: str):
+    def app_upload_replace(self, target_app_id: uuid.UUID, file_name: str, keep_data: bool = True):
         """
         Executes a POST request to the QRS API.
 
         Args:
             target_app_id (UUID): The ID of the app to be replaced.
             file_name (str): The path to the file.
+            keep_data (bool, optional): If set to false and the uploaded .qvf file contains app data, the data will be silently discarded. The default value is true.
 
         Returns:
             dict: JSON response as a dictionary.
         """
         headers = {"Content-Type": "application/vnd.qlik.sense.app"}
         with open(file_name, 'rb') as payload:
-            return self.post(endpoint="/qrs/app/upload/replace", params={"targetappid": str(target_app_id)},
+            return self.post(endpoint="/qrs/app/upload/replace", params={"targetappid": str(target_app_id), "keepdata": keep_data},
                              headers=headers, data=payload)
 
     def reloadtask_create(self, app_id, task_name, custom_properties=None, tags: list = None,

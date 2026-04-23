@@ -13,9 +13,10 @@ client = QRSClient(server_name="<server_name>", server_port=4242, auth_manager=a
                    auth_method="certificate", verify_ssl=True)
 
 app_name = "<app_name>"
+file=r"<file_path/file_name>"
 
 # Calls the API
-result = client.app_upload(app_name=app_name, file_name="<path_to_file>/<file_name>.qvf")
+result = client.app_upload(app_name=app_name, file_name=file)
 
 if result:
     print("App uploaded:", result)
