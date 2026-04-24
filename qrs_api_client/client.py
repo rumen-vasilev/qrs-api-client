@@ -141,6 +141,9 @@ class QRSClient:
         Args:
             endpoint (str): The API endpoint to call.
             params (dict, optional): Query parameters as key-value pairs.
+            headers (dict, optional):
+            data:
+            payload:
 
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
@@ -173,6 +176,74 @@ class QRSClient:
     # High-level convenience methods                                                                                   #
     # ---------------------------------------------------------------------------------------------------------------- #
 
+    def app_get_custom_properties(self, app_id: uuid.UUID) -> list:
+        """
+        Exports the custom properties of certain app as JSON.
+
+        Args:
+            app_id (UUID): The ID of the app.
+
+        Returns:
+            list: JSON response as a list.
+        """
+        result = self.get(endpoint=f"/qrs/app/{app_id}")
+        custom_properties = result["customProperties"]
+        return custom_properties
+
+    def app_get_tags(self, app_id: uuid.UUID) -> list:
+        """
+        Exports the tags of certain app as JSON.
+
+        Args:
+            app_id (UUID): The ID of the app.
+
+        Returns:
+            list: JSON response as a list.
+        """
+        result = self.get(endpoint=f"/qrs/app/{app_id}")
+        tags = result["tags"]
+        return tags
+
+    def app_get_owner(self, app_id: uuid.UUID) -> dict:
+        """
+        Exports the owner of certain app as JSON.
+
+        Args:
+            app_id (UUID): The ID of the app.
+
+        Returns:
+            list: JSON response as a dict.
+        """
+        result = self.get(endpoint=f"/qrs/app/{app_id}")
+        owner = result["owner"]
+        return owner
+
+
+    def app_change_owner(self, app_id: uuid.UUID, user_directory: str, user_id: str) -> dict:
+        """
+        Changes the owner of certain app.
+
+        Args:
+            app_id (UUID): The ID of the app.
+            user_directory (str): The user directory of the new owner.
+            user_id (str): The user id of the new owner.
+
+        Returns:
+            list: JSON response as a dict.
+        """
+        # Create filter string
+        _filter = {"filter": f"userDirectory eq '{user_directory}' and userId eq '{user_id}'"}
+        # Get the new owner
+        owner = self.get(endpoint="/qrs/user", params=_filter)[0]
+        #Get app JSON structure
+        app = self.get(endpoint=f"/qrs/app/{app_id}")
+        # Replace the old owner with the new owner in the app JSON structure
+        app["owner"] = owner
+        result = self.put(endpoint=f"/qrs/app/{app_id}", data=json.dumps(app))
+
+        return result
+
+
     def app_export(self, app_id: uuid.UUID, file_path: str, file_name: str = None, skip_data: bool = False):
         """
         Exports an app in a two-step process using POST and GET methods.
@@ -186,6 +257,7 @@ class QRSClient:
             file_path (str): The directory path where the exported app should be stored.
             file_name (str, optional): File name for the exported app (e.g., "MyApp.qvf"). Falls kein Wert übergeben
             wurde, wird der ursprüngliche Name der Datei genommen.
+            skip_data:
 
         Returns:
             str: Success message with file name and path, or None if an error occurs.

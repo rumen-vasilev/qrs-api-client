@@ -680,3 +680,42 @@ def composite_event_time_constraint(_id: uuid.UUID = None, created_date: datetim
         _composite_event_time_constraint["seconds"] = seconds
 
     return _composite_event_time_constraint
+
+
+def user_condensed(_id: uuid.UUID = None, privileges: list = None, user_id: str = None, user_directory: str = None,
+                   user_directory_connector_name: str = None, name: str = None):
+    """
+    Creates a condensed representation of a user.
+
+    Args:
+        _id (uuid.UUID, optional): Unique identifier of the user.
+        privileges (list, optional): List of privileges.
+        user_id (str): User ID.
+        user_directory (str): User directory.
+        user_directory_connector_name (str, optional): User directory connector name.
+        name (str, optional): Name of the user.
+
+    Returns:
+        dict: Condensed user representation.
+    """
+    _user_condensed = {}
+
+    if _id is not None:
+        _user_condensed["id"] = _id
+
+    if privileges is not None:
+        _user_condensed["privileges"] = privileges
+
+    if user_id is not None:
+        _user_condensed["userId"] = user_id
+
+    if user_directory is not None:
+        _user_condensed["userDirectory"] = user_directory
+
+    if user_directory_connector_name is not None:
+        _user_condensed["userDirectoryConnectorName"] = user_directory_connector_name
+
+    if name is not None:
+        _user_condensed["name"] = name
+
+    return _user_condensed
