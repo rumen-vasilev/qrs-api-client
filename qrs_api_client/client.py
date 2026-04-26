@@ -151,9 +151,9 @@ class QRSClient:
         if headers is None:
             headers = {}
         response = self._request(method="PUT", endpoint=endpoint, params=params, headers=headers, data=data)
-        if response is None:
-            return None
-        return response.json()
+        # if response is None:
+        #     return None
+
 
     def delete(self, endpoint: str, params: dict = None) -> dict:
         """
@@ -189,6 +189,36 @@ class QRSClient:
         result = self.get(endpoint=f"/qrs/app/{app_id}")
         custom_properties = result["customProperties"]
         return custom_properties
+
+    def app_set_custom_properties(self, app_id: uuid.UUID, custom_properties: dict = None):
+
+        for name, values in custom_properties.items():
+            for value in values:
+                # Create filter string
+                _filter = {"filter": f"objectTypes eq 'App' and name eq '{name}' and choiceValues eq '{value}'"}
+                try:
+                    # Get the custom property definition
+                    cp = self.get(endpoint=f"/qrs/custompropertydefinition/full", params=_filter)[0]
+                except IndexError:
+                    logger.error("Custom property name or value you try to import does not exist in Qlik Sense! "
+                                 "You should create it first in the QMC.: %s", IndexError)
+                    continue
+                # Get ID of the custom property
+                def_id = cp["id"]
+                # Build custom property definition structure
+                custom_property_definition_condensed = models.custom_property_definition_condensed(_id=def_id)
+                # Build custom property structure
+                custom_property_value = models.custom_property_value(value=value, definition=custom_property_definition_condensed)
+                # Get app JSON structure
+                app = self.get(endpoint=f"/qrs/app/{app_id}")
+                # Insert custom property to the app
+                app["customProperties"].append(custom_property_value)
+                result = self.put(endpoint=f"/qrs/app/{app_id}", data=json.dumps(app))
+                if result is None:
+                    continue
+                return result
+        return None
+
 
     def app_get_tags(self, app_id: uuid.UUID) -> list:
         """
@@ -235,7 +265,7 @@ class QRSClient:
         _filter = {"filter": f"userDirectory eq '{user_directory}' and userId eq '{user_id}'"}
         # Get the new owner
         owner = self.get(endpoint="/qrs/user", params=_filter)[0]
-        #Get app JSON structure
+        # Get app JSON structure
         app = self.get(endpoint=f"/qrs/app/{app_id}")
         # Replace the old owner with the new owner in the app JSON structure
         app["owner"] = owner
