@@ -188,6 +188,7 @@ class QRSClient:
         custom_properties = result["customProperties"]
         return custom_properties
 
+
     def app_set_custom_properties(self, app_id: uuid.UUID, custom_properties: dict):
         """
         Inserts custom properties into an app.
@@ -199,6 +200,13 @@ class QRSClient:
         Returns:
             list: JSON response as a list.
         """
+        # Get app JSON structure
+        app = self.get(endpoint=f"/qrs/app/{app_id}")
+        # Create a list with custom properties, which were assigned to the app
+        app_cps = []
+        for app_cp in app["customProperties"]:
+            app_cps.append(app_cp["definition"]["id"] + "_" + app_cp["value"])
+
         for name, values in custom_properties.items():
             for value in values:
                 # Create filter string
@@ -216,15 +224,12 @@ class QRSClient:
                 custom_property_definition_condensed = models.custom_property_definition_condensed(_id=def_id)
                 # Build custom property structure
                 custom_property_value = models.custom_property_value(value=value, definition=custom_property_definition_condensed)
-                # Get app JSON structure
-                app = self.get(endpoint=f"/qrs/app/{app_id}")
-                # Insert custom property to the app
-                app["customProperties"].append(custom_property_value)
-                result = self.put(endpoint=f"/qrs/app/{app_id}", data=json.dumps(app))
-                if result is None:
-                    continue
-                return result
-        return None
+                # Check if a custom property was assigned to the app
+                if custom_property_value["definition"]["id"] + "_" + custom_property_value["value"] not in app_cps:
+                    # Insert custom property to the app
+                    app["customProperties"].append(custom_property_value)
+
+        return self.put(endpoint=f"/qrs/app/{app_id}", data=json.dumps(app))
 
 
     def app_get_tags(self, app_id: uuid.UUID, tags: list):
