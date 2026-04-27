@@ -316,9 +316,7 @@ class QRSClient:
         app = self.get(endpoint=f"/qrs/app/{app_id}")
         # Replace the old owner with the new owner in the app JSON structure
         app["owner"] = owner
-        result = self.put(endpoint=f"/qrs/app/{app_id}", data=json.dumps(app))
-
-        return result
+        return self.put(endpoint=f"/qrs/app/{app_id}", data=json.dumps(app))
 
 
     def app_export(self, app_id: uuid.UUID, file_path: str, file_name: str = None, skip_data: bool = False):
