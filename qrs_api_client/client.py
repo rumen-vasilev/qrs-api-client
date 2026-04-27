@@ -254,6 +254,9 @@ class QRSClient:
         Returns:
             list: JSON response as a list.
         """
+        # Get app JSON structure
+        app = self.get(endpoint=f"/qrs/app/{app_id}")
+
         for name in tags:
             # Create filter string
             _filter = {"filter": f"name eq '{name}'"}
@@ -267,16 +270,10 @@ class QRSClient:
             # Get ID of the tag
             def_id = tag["id"]
             # Build tag definition structure
-            tag_condensed = models.tag_condensed(_id=def_id)
-            # Get app JSON structure
-            app = self.get(endpoint=f"/qrs/app/{app_id}")
+            tag_condensed = models.tag_condensed(_id=def_id, name=name)
             # Insert custom property to the app
             app["tags"].append(tag_condensed)
-            result = self.put(endpoint=f"/qrs/app/{app_id}", data=json.dumps(app))
-            if result is None:
-                continue
-            return result
-        return None
+        return self.put(endpoint=f"/qrs/app/{app_id}", data=json.dumps(app))
 
 
     def app_get_owner(self, app_id: uuid.UUID) -> dict:
