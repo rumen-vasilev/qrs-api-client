@@ -134,7 +134,7 @@ class QRSClient:
             return None
         return response.json()
 
-    def put(self, endpoint: str, params: dict = None, headers: dict = None, data=None) -> dict:
+    def put(self, endpoint: str, params: dict = None, headers: dict = None, data=None):
         """
         Executes a PUT request to the QRS API.
 
@@ -151,9 +151,7 @@ class QRSClient:
         if headers is None:
             headers = {}
         response = self._request(method="PUT", endpoint=endpoint, params=params, headers=headers, data=data)
-        # if response is None:
-        #     return None
-
+        return response
 
     def delete(self, endpoint: str, params: dict = None) -> dict:
         """
