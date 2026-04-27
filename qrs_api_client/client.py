@@ -190,8 +190,17 @@ class QRSClient:
         custom_properties = result["customProperties"]
         return custom_properties
 
-    def app_set_custom_properties(self, app_id: uuid.UUID, custom_properties: dict = None):
+    def app_set_custom_properties(self, app_id: uuid.UUID, custom_properties: dict):
+        """
+        Inserts custom properties into an app.
 
+        Args:
+            app_id (UUID): The ID of the app.
+            custom_properties (dict): Custom property with name and values to be inserted. The values have a 'list' as data type.
+
+        Returns:
+            list: JSON response as a list.
+        """
         for name, values in custom_properties.items():
             for value in values:
                 # Create filter string
@@ -220,12 +229,13 @@ class QRSClient:
         return None
 
 
-    def app_get_tags(self, app_id: uuid.UUID) -> list:
+    def app_get_tags(self, app_id: uuid.UUID, tags: list):
         """
         Exports the tags of certain app as JSON.
 
         Args:
             app_id (UUID): The ID of the app.
+            tags (list): List with tags to be imported.
 
         Returns:
             list: JSON response as a list.
@@ -233,6 +243,43 @@ class QRSClient:
         result = self.get(endpoint=f"/qrs/app/{app_id}")
         tags = result["tags"]
         return tags
+
+
+    def app_set_tags(self, app_id: uuid.UUID, tags: list):
+        """
+        Inserts tags into an app.
+
+        Args:
+            app_id (UUID): The ID of the app.
+            tags (list): The tags of the app.
+
+        Returns:
+            list: JSON response as a list.
+        """
+        for name in tags:
+            # Create filter string
+            _filter = {"filter": f"name eq '{name}'"}
+            try:
+                # Get the custom property definition
+                tag = self.get(endpoint=f"/qrs/tag/full", params=_filter)[0]
+            except IndexError:
+                logger.error("The tag you try to import does not exist in Qlik Sense! "
+                             "You should create it first in the QMC.: %s", IndexError)
+                continue
+            # Get ID of the tag
+            def_id = tag["id"]
+            # Build tag definition structure
+            tag_condensed = models.tag_condensed(_id=def_id)
+            # Get app JSON structure
+            app = self.get(endpoint=f"/qrs/app/{app_id}")
+            # Insert custom property to the app
+            app["tags"].append(tag_condensed)
+            result = self.put(endpoint=f"/qrs/app/{app_id}", data=json.dumps(app))
+            if result is None:
+                continue
+            return result
+        return None
+
 
     def app_get_owner(self, app_id: uuid.UUID) -> dict:
         """
