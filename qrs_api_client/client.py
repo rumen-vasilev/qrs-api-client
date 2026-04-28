@@ -411,6 +411,7 @@ class QRSClient:
             return self.post(endpoint="/qrs/app/upload/replace", params={"targetappid": str(target_app_id), "keepdata": keep_data},
                              headers=headers, data=payload)
 
+
     def reloadtask_create(self, app_id, task_name, custom_properties=None, tags: list = None,
                           created_date: datetime = None, modified_date: datetime = None,
                           modified_by_user_name: str = None, schema_events: list = None, composite_events: list = None,
@@ -479,3 +480,96 @@ class QRSClient:
 
         # Execute API call
         return self.post(endpoint="/qrs/reloadtask/create", data=payload)
+
+
+    # def create_tag(self, name: str):
+    #
+    #     tags = self.get(endpoint="/qrs/tag")
+    #
+    #     if not any(item["name"].lower() == name.lower() for item in tags):
+    #         # Construct tag structure
+    #         tag = models.tag(name=name)
+    #         # Serialize payload to JSON
+    #         payload = json.dumps(tag)
+    #         # Execute API call
+    #         return self.post(endpoint="/qrs/tag", data=payload)
+    #     logger.error("The tag \"%s\" already exists!", name)
+    #     return None
+
+    def create_tag(self, name: str):
+        """
+        Creates a single tag via the Qlik Repository Service.
+
+        Retrieves all existing tags first and checks case-insensitively whether
+        a tag with the given name already exists. If not, a new tag is created
+        via the POST /qrs/tag endpoint.
+
+        Args:
+            name (str): The name of the tag to create. Comparison with existing
+                tags is case-insensitive.
+
+        Returns:
+            dict: JSON response from the API containing the created tag, or
+                None if a tag with the given name already exists.
+        """
+        # Call existing tags
+        existing_tags = self.get(endpoint="/qrs/tag")
+        # Get names of existing tags
+        existing_names = {item["name"].lower() for item in existing_tags}
+
+        # Check, if a tag already exists
+        if name.lower() in existing_names:
+            logger.error("The tag \"%s\" already exists!", name)
+            return None
+        # Construct tag structure
+        tag = models.tag(name=name)
+        # Serialize payload to JSON
+        payload = json.dumps(tag)
+        # Execute API call to /tag endpoint
+        return self.post(endpoint="/qrs/tag", data=payload)
+
+    def create_tags(self, names: list[str]):
+        """
+        Creates multiple tags in a single API call.
+
+        Uses the bulk endpoint POST /qrs/tag/many to create several tags at once.
+        Before sending the request, both already existing tags and duplicates
+        within the input list are filtered out (case-insensitive). If no tags
+        remain after filtering, no request is sent.
+
+        Args:
+            names (list[str]): List of tag names to create. Already existing
+                names and duplicates within the list are skipped and logged
+                as errors.
+
+        Returns:
+            list[dict]: JSON response from the API containing the created tags,
+                or None if no new tags remain to be created after filtering.
+        """
+        # Call existing tags
+        existing_tags = self.get(endpoint="/qrs/tag")
+        # Get names of existing tags
+        existing_names = {item["name"].lower() for item in existing_tags}
+
+        # Filter new tags and remove duplicates from input
+        seen = set()
+        new_tags = []
+        for name in names:
+            key = name.lower()
+            if key in existing_names:
+                logger.error("The tag \"%s\" already exists!", name)
+                continue
+            if key in seen:
+                logger.error("The tag \"%s\" is duplicated in the input!", name)
+                continue
+            seen.add(key)
+            new_tags.append(models.tag(name=name))
+
+        if not new_tags:
+            logger.warning("No new tags to create.")
+            return None
+
+        # Serialize payload to JSON
+        payload = json.dumps(new_tags)
+        # Execute API call to /tag/many endpoint
+        return self.post(endpoint="/qrs/tag/many", data=payload)

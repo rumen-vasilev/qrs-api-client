@@ -466,6 +466,49 @@ def custom_property_definition_condensed(_id: uuid.UUID = None, privileges: list
     return _custom_property_definition_condensed
 
 
+def tag(_id: uuid.UUID = None, created_date: datetime = None, modified_date: datetime = None,
+        modified_by_user_name: str = None, schema_path: str = None, privileges: list = None, name: str = None):
+    """
+    Creates a dictionary representing a condensed tag.
+
+    Args:
+        _id (uuid.UUID, optional): The unique identifier for the tag.
+        created_date (datetime, optional): The date the property was created.
+        modified_date (datetime, optional): The date the property was last modified.
+        modified_by_user_name (str, optional): The username of the person who last modified the property.
+        schema_path (str, optional): The schema path for the custom property.
+        privileges (list, optional): A list of privileges associated with the tag.
+        name (str): The name of the tag.
+
+    Returns:
+        dict: A dictionary representing the tag.
+    """
+    _tag = {}
+
+    if _id is not None:
+        _tag["id"] = _id
+
+    if created_date is not None:
+        _tag["createdDate"] = created_date
+
+    if modified_date is not None:
+        _tag["modifiedDate"] = modified_date
+
+    if modified_by_user_name is not None:
+        _tag["modifiedByUserName"] = modified_by_user_name
+
+    if schema_path is not None:
+        _tag["schemaPath"] = schema_path
+
+    if privileges is not None:
+        _tag["privileges"] = privileges
+
+    if name is not None:
+        _tag["name"] = name
+
+    return _tag
+
+
 def tag_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None):
     """
     Creates a dictionary representing a condensed tag.
