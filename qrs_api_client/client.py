@@ -573,3 +573,120 @@ class QRSClient:
         payload = json.dumps(new_tags)
         # Execute API call to /tag/many endpoint
         return self.post(endpoint="/qrs/tag/many", data=payload)
+
+    def create_custom_property(self, name: str, value_type: str = "Text",
+                               choice_values: list[str] = None,
+                               object_types: list[str] = None,
+                               description: str = None):
+        """
+        Creates a single custom property definition via the Qlik Repository Service.
+
+        Retrieves all existing custom property definitions first and checks
+        case-insensitively whether a definition with the given name already
+        exists. If not, a new custom property definition is created via the
+        POST /qrs/custompropertydefinition endpoint.
+
+        Args:
+            name (str): The name of the custom property definition to create.
+                Comparison with existing definitions is case-insensitive.
+            value_type (str, optional): The type of value the property accepts
+                (e.g. "Text"). Default value is "Text".
+            choice_values (list[str], optional): Predefined choice values for
+                the property. Only relevant when the property should be
+                restricted to a fixed set of values.
+            object_types (list[str], optional): List of object types the
+                property can be applied to (e.g. ["App", "Stream"]).
+            description (str, optional): A description of the custom property
+                definition.
+
+        Returns:
+            dict: JSON response from the API containing the created custom
+                property definition, or None if a definition with the given
+                name already exists.
+        """
+        # Retrieve existing custom property definitions
+        existing_properties = self.get(endpoint="/qrs/custompropertydefinition")
+        existing_names = {item["name"].lower() for item in existing_properties}
+
+        # Existence check
+        if name.lower() in existing_names:
+            logger.error("The custom property \"%s\" already exists!", name)
+            return None
+
+        # Construct custom property definition structure
+        custom_property = models.custom_property_definition(
+            name=name,
+            value_type=value_type,
+            choice_values=choice_values,
+            object_types=object_types,
+            description=description,
+        )
+        # Serialize payload to JSON
+        payload = json.dumps(custom_property)
+        # Execute API call
+        return self.post(endpoint="/qrs/custompropertydefinition", data=payload)
+
+    def create_custom_properties(self, properties: list[dict]):
+        """
+        Creates multiple custom property definitions in a single API call.
+
+        Uses the bulk endpoint POST /qrs/custompropertydefinition/many to create
+        several custom property definitions at once. Before sending the request,
+        both already existing definitions and duplicates within the input list
+        are filtered out (case-insensitive, by name). If no definitions remain
+        after filtering, no request is sent.
+
+        Each entry in the input list must at least contain a "name" key. The
+        following keys are supported and forwarded to
+        models.custom_property_definition():
+        "name", "value_type", "choice_values", "object_types", "description".
+
+        Args:
+            properties (list[dict]): List of dictionaries describing the custom
+                property definitions to create. Already existing names and
+                duplicates within the list are skipped and logged as errors.
+
+        Returns:
+            list[dict]: JSON response from the API containing the created
+                custom property definitions, or None if no new definitions
+                remain to be created after filtering.
+        """
+        # Retrieve existing custom property definitions once
+        existing_properties = self.get(endpoint="/qrs/custompropertydefinition")
+        existing_names = {item["name"].lower() for item in existing_properties}
+
+        # Filter new definitions and remove duplicates within the input
+        seen = set()
+        new_properties = []
+        for prop in properties:
+            name = prop.get("name")
+            if not name:
+                logger.error("Skipping custom property without a name: %s", prop)
+                continue
+
+            key = name.lower()
+            if key in existing_names:
+                logger.error("The custom property \"%s\" already exists!", name)
+                continue
+            if key in seen:
+                logger.error("The custom property \"%s\" is duplicated in the input!", name)
+                continue
+            seen.add(key)
+
+            # Build the custom property definition from the supplied fields
+            new_properties.append(models.custom_property_definition(
+                name=name,
+                value_type=prop.get("value_type"),
+                choice_values=prop.get("choice_values"),
+                object_types=prop.get("object_types"),
+                description=prop.get("description"),
+            ))
+
+        if not new_properties:
+            logger.warning("No new custom properties to create.")
+            return None
+
+        # Serialize payload as JSON array
+        payload = json.dumps(new_properties)
+        # Execute API call to the /many endpoint
+        return self.post(endpoint="/qrs/custompropertydefinition/many", data=payload)

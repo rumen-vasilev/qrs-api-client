@@ -431,6 +431,66 @@ def custom_property_value(_id: uuid.UUID = None, created_date: datetime = None, 
     return _custom_property_value
 
 
+def custom_property_definition(_id: uuid.UUID = None, created_date: datetime = None, modified_date: datetime = None,
+        modified_by_user_name: str = None, schema_path: str = None, privileges: list = None, name: str = None,
+        value_type: str = None, choice_values: list[str] = None, object_types: list[str] = None, description: str = None):
+    """
+    Creates a dictionary representing a condensed custom property definition.
+
+    Args:
+        _id (uuid.UUID, optional): The unique identifier for the property definition.
+        created_date:
+        modified_date:
+        modified_by_user_name:
+        schema_path:
+        privileges (list, optional): A list of privileges associated with the property.
+        name (str, optional): The name of the property definition.
+        value_type (str, optional): The type of value the property accepts.
+        choice_values (optional): Possible values for the property.
+        object_types:
+        description:
+
+    Returns:
+        dict: A dictionary representing the custom property definition.
+    """
+    _custom_property_definition = {}
+
+    if _id is not None:
+        _custom_property_definition["id"] = _id
+
+    if created_date is not None:
+        _custom_property_definition["createdDate"] = created_date
+
+    if modified_date is not None:
+        _custom_property_definition["modifiedDate"] = modified_date
+
+    if modified_by_user_name is not None:
+        _custom_property_definition["modifiedByUserName"] = modified_by_user_name
+
+    if schema_path is not None:
+        _custom_property_definition["schemaPath"] = schema_path
+
+    if privileges is not None:
+        _custom_property_definition["privileges"] = privileges
+
+    if name is not None:
+        _custom_property_definition["name"] = name
+
+    if value_type is not None:
+        _custom_property_definition["valueType"] = value_type
+
+    if choice_values is not None:
+        _custom_property_definition["choiceValues"] = choice_values
+
+    if object_types is not None:
+        _custom_property_definition["objectTypes"] = object_types
+
+    if description is not None:
+        _custom_property_definition["description"] = description
+
+    return _custom_property_definition
+
+
 def custom_property_definition_condensed(_id: uuid.UUID = None, privileges: list = None, name: str = None,
                                          value_type: str = None, choice_values=None):
     """
