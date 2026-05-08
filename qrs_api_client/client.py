@@ -631,20 +631,17 @@ class QRSClient:
         Creates multiple custom property definitions in a single API call.
 
         Uses the bulk endpoint POST /qrs/custompropertydefinition/many to create
-        several custom property definitions at once. Before sending the request,
-        both already existing definitions and duplicates within the input list
-        are filtered out (case-insensitive, by name). If no definitions remain
-        after filtering, no request is sent.
-
-        Each entry in the input list must at least contain a "name" key. The
-        following keys are supported and forwarded to
-        models.custom_property_definition():
-        "name", "value_type", "choice_values", "object_types", "description".
+        several custom property definitions at once. Each entry in the input
+        list is expected to be a custom property definition dict as produced by
+        models.custom_property_definition(). Already existing definitions and
+        duplicates within the input list are filtered out (case-insensitive,
+        by name). If no definitions remain after filtering, no request is sent.
 
         Args:
-            properties (list[dict]): List of dictionaries describing the custom
-                property definitions to create. Already existing names and
-                duplicates within the list are skipped and logged as errors.
+            properties (list[dict]): List of custom property definition dicts
+                (e.g. produced by models.custom_property_definition()) to be
+                created. Already existing names and duplicates within the list
+                are skipped and logged as errors.
 
         Returns:
             list[dict]: JSON response from the API containing the created
@@ -673,14 +670,8 @@ class QRSClient:
                 continue
             seen.add(key)
 
-            # Build the custom property definition from the supplied fields
-            new_properties.append(models.custom_property_definition(
-                name=name,
-                value_type=prop.get("value_type"),
-                choice_values=prop.get("choice_values"),
-                object_types=prop.get("object_types"),
-                description=prop.get("description"),
-            ))
+            # Forward the prebuilt definition as-is
+            new_properties.append(prop)
 
         if not new_properties:
             logger.warning("No new custom properties to create.")
