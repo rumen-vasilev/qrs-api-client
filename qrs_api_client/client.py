@@ -8,6 +8,7 @@ import json
 import uuid
 import logging
 from datetime import datetime
+import time
 from urllib.parse import urlparse, unquote
 
 import requests
@@ -114,7 +115,7 @@ class QRSClient:
             return None
         return response.json()
 
-    def post(self, endpoint: str, params: dict = None, headers: dict = None, data=None) -> dict:
+    def post(self, endpoint: str, params: dict = None, headers: dict = None, data=None):
         """
         Executes a POST request to the QRS API.
 
@@ -130,9 +131,17 @@ class QRSClient:
         if headers is None:
             headers = {}
         response = self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data)
-        if response is None:
-            return None
-        return response.json()
+        # if response is None:
+        #     return None
+        # elif response == "":
+        #     return response
+        # else:
+        #     return response.json()
+        if type(response) is dict:
+            return response.json()
+        else:
+            return response
+
 
     def put(self, endpoint: str, params: dict = None, headers: dict = None, data=None):
         """
@@ -410,6 +419,32 @@ class QRSClient:
         with open(file_name, 'rb') as payload:
             return self.post(endpoint="/qrs/app/upload/replace", params={"targetappid": str(target_app_id), "keepdata": keep_data},
                              headers=headers, data=payload)
+
+
+    def app_reload(self, app_id: uuid.UUID):
+        """
+        Triggers a reload for the specified app via the Qlik Repository Service.
+
+        Verifies that the app exists by retrieving it from /qrs/app/{id}. If the
+        app exists, a reload is triggered via POST /qrs/app/{id}/reload. The
+        reload itself is executed asynchronously by the Qlik engine; this method
+        only initiates it.
+
+        Args:
+            app_id (UUID): The ID of the app to reload.
+
+        Returns:
+            dict: JSON response from the API confirming that the reload was
+                triggered, or None if the app does not exist or an error occurs.
+        """
+        # Verify that the app exists
+        app = self.get(endpoint=f"/qrs/app/{app_id}")
+        if not app:
+            logger.error("The app with ID \"%s\" does not exist!", app_id)
+            return None
+
+        # Execute API call to trigger the reload
+        return self.post(endpoint=f"/qrs/app/{app_id}/reload")
 
 
     def reloadtask_create(self, app_id, task_name, custom_properties=None, tags: list = None,
