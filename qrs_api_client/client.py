@@ -8,7 +8,6 @@ import json
 import uuid
 import logging
 from datetime import datetime
-import time
 from urllib.parse import urlparse, unquote
 
 import requests
@@ -131,12 +130,6 @@ class QRSClient:
         if headers is None:
             headers = {}
         response = self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data)
-        # if response is None:
-        #     return None
-        # elif response == "":
-        #     return response
-        # else:
-        #     return response.json()
         if type(response) is dict:
             return response.json()
         else:
