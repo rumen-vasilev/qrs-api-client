@@ -15,6 +15,7 @@ import requests
 
 from qrs_api_client.auth import AuthManager
 import qrs_api_client.models as models
+import qrs_api_client.enums as enums
 
 
 logger = logging.getLogger(__name__)
@@ -415,37 +416,6 @@ class QRSClient:
                              headers=headers, data=payload)
 
 
-    # Qlik Sense execution result status enum values
-    # (see /qrs/about/api/enums for the full list)
-    EXECUTION_STATUS_NEVER_STARTED = 0
-    EXECUTION_STATUS_TRIGGERED = 1
-    EXECUTION_STATUS_STARTED = 2
-    EXECUTION_STATUS_QUEUED = 3
-    EXECUTION_STATUS_ABORT_INITIATED = 4
-    EXECUTION_STATUS_ABORTING = 5
-    EXECUTION_STATUS_ABORTED = 6
-    EXECUTION_STATUS_FINISHED_SUCCESS = 7
-    EXECUTION_STATUS_FINISHED_FAIL = 8
-    EXECUTION_STATUS_SKIPPED = 9
-    EXECUTION_STATUS_RETRY = 10
-    EXECUTION_STATUS_ERROR = 11
-    EXECUTION_STATUS_RESET = 12
-
-    # Statuses that indicate the task execution has finished
-    _TERMINAL_EXECUTION_STATUSES = frozenset({
-        EXECUTION_STATUS_ABORTED,
-        EXECUTION_STATUS_FINISHED_SUCCESS,
-        EXECUTION_STATUS_FINISHED_FAIL,
-        EXECUTION_STATUS_SKIPPED,
-        EXECUTION_STATUS_ERROR,
-    })
-
-    # .NET DateTime.MinValue serialized to ISO 8601 - used by Qlik as a
-    # sentinel value for fields like stopTime/nextExecution when no value
-    # has been set yet.
-    _DOTNET_MIN_DATETIME = "1753-01-01T00:00:00.000Z"
-
-
     def app_reload(self, app_id: uuid.UUID, poll_interval: float = 5.0, timeout: float = 3600.0) -> dict:
         """
         Triggers a reload for the specified app by creating (or reusing) a
@@ -559,11 +529,11 @@ class QRSClient:
             # finished: a new execution result, a terminal status and a
             # real stopTime (i.e. not the .NET MinValue sentinel).
             is_new_execution = result_id is not None and result_id != baseline_result_id
-            is_terminal = status in self._TERMINAL_EXECUTION_STATUSES
-            has_real_stop_time = stop_time and stop_time != self._DOTNET_MIN_DATETIME
+            is_terminal = status in enums.ExecutionStatus.terminal_statuses()
+            has_real_stop_time = stop_time and stop_time != enums.DOTNET_MIN_DATETIME
 
             if is_new_execution and is_terminal and has_real_stop_time:
-                success = status == self.EXECUTION_STATUS_FINISHED_SUCCESS
+                success = status == enums.ExecutionStatus.FINISHED_SUCCESS
                 if success:
                     logger.info("Reload of app \"%s\" finished successfully "
                                 "(duration: %s ms).",
