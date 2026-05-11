@@ -440,6 +440,11 @@ class QRSClient:
         EXECUTION_STATUS_ERROR,
     })
 
+    # .NET DateTime.MinValue serialized to ISO 8601 - used by Qlik as a
+    # sentinel value for fields like stopTime/nextExecution when no value
+    # has been set yet.
+    _DOTNET_MIN_DATETIME = "1753-01-01T00:00:00.000Z"
+
 
     def app_reload(self, app_id: uuid.UUID, poll_interval: float = 5.0, timeout: float = 3600.0) -> dict:
         """
@@ -452,14 +457,11 @@ class QRSClient:
         with the conventional name "Manually triggered reload of <app_name>"
         for that app. If no such task exists, one is created via
         reloadtask_create() with no schema events (only manually triggerable).
-        The task is then started via POST /qrs/task/{id}/start, and the latest
-        execution result for the task is polled via GET
-        /qrs/executionresult/full until it reaches a terminal status
-        (FinishedSuccess, FinishedFail, Aborted, Skipped or Error).
-
-        Only execution results with startTime greater than the moment the
-        task was triggered are considered, so stale results from previous
-        runs of the same task are ignored.
+        The task is then started via POST /qrs/task/{id}/start, and the task
+        itself is polled via GET /qrs/reloadtask/{id} until its embedded
+        operational.lastExecutionResult reflects a finished new execution
+        (different execution result id than before the start, status in a
+        terminal state and a real stopTime).
 
         Args:
             app_id (UUID): The ID of the app to reload.
@@ -472,9 +474,7 @@ class QRSClient:
             dict: A result dictionary with the following keys:
                 - "success" (bool): True if the reload completed successfully
                   (status FinishedSuccess), False otherwise.
-                - "status" (int): The final execution result status code.
-                - "executionResult" (dict): The full execution result object.
-                - "task" (dict): The reload task object that was used.
+                - "task" (dict): The reload task object after completion.
                 Returns None if the app does not exist, the task could not
                 be created or started, or the timeout is reached.
         """
@@ -511,7 +511,7 @@ class QRSClient:
                 logger.error("Failed to create reload task for app \"%s\"!", app_name)
                 return None
 
-            # Get the strucure of the new task
+            # Get the structure of the new task
             task = self.get(
                 endpoint="/qrs/reloadtask/full",
                 params={"filter": f"app.id eq {app_id} and name eq '{task_name}'"},
@@ -519,8 +519,11 @@ class QRSClient:
 
         task_id = uuid.UUID(task["id"])
 
-        # Record the moment we trigger the task; used to filter out stale results
-        trigger_time = datetime.utcnow()
+        # Remember the id of the previous execution result (if any) so we can
+        # detect that a brand new execution result has appeared. If the task
+        # has never run, baseline is None.
+        baseline_result = (task.get("operational") or {}).get("lastExecutionResult") or {}
+        baseline_result_id = baseline_result.get("id")
 
         # Start the task
         logger.info("Starting reload task \"%s\" (ID: %s).", task_name, task_id)
@@ -529,14 +532,8 @@ class QRSClient:
             logger.error("Failed to start reload task \"%s\"!", task_name)
             return None
 
-        # Poll the execution result for this task until it reaches a terminal status.
-        # Use a startTime filter to ignore stale results from earlier runs.
-        trigger_iso = trigger_time.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-        filter_query = {
-            "filter": f"taskID eq {task_id} and startTime ge '{trigger_iso}'",
-            "orderby": "startTime desc",
-        }
-
+        # Poll the task itself until its embedded lastExecutionResult shows
+        # a NEW finished execution.
         start_time = time.monotonic()
         while True:
             elapsed = time.monotonic() - start_time
@@ -547,29 +544,37 @@ class QRSClient:
 
             time.sleep(poll_interval)
 
-            results = self.get(endpoint="/qrs/executionresult/full", params=filter_query)
+            task = self.get(endpoint=f"/qrs/reloadtask/{task_id}")
+            if not task:
+                logger.error("Lost access to reload task \"%s\" while polling!",
+                             task_name)
+                return None
 
-            if not results:
-                logger.debug("No execution result yet for task \"%s\" "
-                             "(elapsed: %.0fs)", task_name, elapsed)
-                continue
+            result = (task.get("operational") or {}).get("lastExecutionResult") or {}
+            result_id = result.get("id")
+            status = result.get("status")
+            stop_time = result.get("stopTime")
 
-            latest = results[0]
+            # Three conditions must all be met for the run to count as
+            # finished: a new execution result, a terminal status and a
+            # real stopTime (i.e. not the .NET MinValue sentinel).
+            is_new_execution = result_id is not None and result_id != baseline_result_id
+            is_terminal = status in self._TERMINAL_EXECUTION_STATUSES
+            has_real_stop_time = stop_time and stop_time != self._DOTNET_MIN_DATETIME
 
-            status = latest.get("status")
-
-            if status in self._TERMINAL_EXECUTION_STATUSES:
+            if is_new_execution and is_terminal and has_real_stop_time:
                 success = status == self.EXECUTION_STATUS_FINISHED_SUCCESS
                 if success:
-                    logger.info("Reload of app \"%s\" finished successfully.", app_name)
+                    logger.info("Reload of app \"%s\" finished successfully "
+                                "(duration: %s ms).",
+                                app_name, result.get("duration"))
                 else:
-                    logger.error("Reload of app \"%s\" finished with status %s.",
-                                 app_name, status)
+                    logger.error("Reload of app \"%s\" finished with status %s "
+                                 "(duration: %s ms).",
+                                 app_name, status, result.get("duration"))
 
                 return {
                     "success": success,
-                    "status": status,
-                    "executionResult": latest,
                     "task": task,
                 }
 
