@@ -416,22 +416,31 @@ class QRSClient:
                              headers=headers, data=payload)
 
 
-    def app_reload(self, app_id: uuid.UUID, poll_interval: float = 5.0, timeout: float = 3600.0) -> dict:
+    def app_reload(self, app_id: uuid.UUID, poll_interval: float = 5.0) -> dict:
         """
         Triggers a reload for the specified app by creating (or reusing) a
         reload task named "Manually triggered reload of <app_name>", starting
-        it, and waiting for it to complete. Mimics the QMC's "Reload now"
-        functionality.
+        it via the synchronous task start endpoint, and waiting for it to
+        complete by polling the execution session. Mimics the QMC's
+        "Reload now" functionality.
 
-        Verifies that the app exists, then looks for an existing reload task
-        with the conventional name "Manually triggered reload of <app_name>"
-        for that app. If no such task exists, one is created via
-        reloadtask_create() with no schema events (only manually triggerable).
-        The task is then started via POST /qrs/task/{id}/start, and the task
-        itself is polled via GET /qrs/reloadtask/{id} until its embedded
-        operational.lastExecutionResult reflects a finished new execution
-        (different execution result id than before the start, status in a
-        terminal state and a real stopTime).
+        Workflow (as documented by Qlik):
+            1. Verify that the app exists.
+            2. Look for an existing reload task named
+               "Manually triggered reload of <app_name>" for that app. If
+               no such task exists, create one via reloadtask_create() with
+               no schema events (only manually triggerable).
+            3. Start the task via POST /qrs/task/{id}/start/synchronous.
+               The server returns an execution session GUID. An empty GUID
+               (00000000-...) means the task could not be started (disabled,
+               no scheduler available, app not available).
+            4. Poll GET /qrs/executionsession/{id} until it returns 404
+               Not Found - that is the signal that the task has finished
+               and the execution session has been auto-deleted from the
+               repository.
+            5. Fetch the execution result via
+               GET /qrs/executionresult?filter=executionID eq <session_id>
+               to get the final status, duration and details.
 
         Args:
             app_id (UUID): The ID of the app to reload.
@@ -444,10 +453,12 @@ class QRSClient:
             dict: A result dictionary with the following keys:
                 - "success" (bool): True if the reload completed successfully
                   (status FinishedSuccess), False otherwise.
-                - "task" (dict): The reload task object after completion.
+                - "task" (dict): The reload task object that was used.
                 Returns None if the app does not exist, the task could not
                 be created or started, or the timeout is reached.
         """
+        _EMPTY_GUID = "00000000-0000-0000-0000-000000000000"
+
         # Verify that the app exists
         app = self.get(endpoint=f"/qrs/app/{app_id}")
         if not app:
@@ -489,67 +500,79 @@ class QRSClient:
 
         task_id = uuid.UUID(task["id"])
 
-        # Remember the id of the previous execution result (if any) so we can
-        # detect that a brand new execution result has appeared. If the task
-        # has never run, baseline is None.
-        baseline_result = (task.get("operational") or {}).get("lastExecutionResult") or {}
-        baseline_result_id = baseline_result.get("id")
-
-        # Start the task
+        # Start the task synchronously - the server returns an execution
+        # session GUID as soon as the task has been picked up by the scheduler.
         logger.info("Starting reload task \"%s\" (ID: %s).", task_name, task_id)
-        start_response = self.post(endpoint=f"/qrs/task/{task_id}/start")
+        start_response = self.post(endpoint=f"/qrs/task/{task_id}/start/synchronous")
         if start_response is None:
             logger.error("Failed to start reload task \"%s\"!", task_name)
             return None
 
-        # Poll the task itself until its embedded lastExecutionResult shows
-        # a NEW finished execution.
+        # Get the session id
+        session_id = start_response.json().get("value")
+        if not session_id or session_id == _EMPTY_GUID:
+            logger.error("Reload task \"%s\" could not be started: the server "
+                         "returned an empty session ID. The task may be disabled, "
+                         "no scheduler is available or the app is unavailable.",
+                         task_name)
+            return None
+
+        logger.info("Reload task \"%s\" started with execution session ID %s.",
+                    task_name, session_id)
+
+        # Poll GET /qrs/executionsession/{id} until it returns 404 Not Found.
+        # Per Qlik's documentation, 404 indicates the task has finished and
+        # the execution session entity has been deleted from the database.
+        # self.get returns None on any non-2xx response (including 404), so
+        # we treat a None response as "task finished".
         start_time = time.monotonic()
         while True:
             elapsed = time.monotonic() - start_time
-            if elapsed > timeout:
-                logger.error("Timeout (%.0fs) reached while waiting for reload "
-                             "of app \"%s\" to complete!", timeout, app_name)
-                return None
 
             time.sleep(poll_interval)
 
-            task = self.get(endpoint=f"/qrs/reloadtask/{task_id}")
-            if not task:
-                logger.error("Lost access to reload task \"%s\" while polling!",
-                             task_name)
-                return None
+            session = self.get(endpoint=f"/qrs/executionsession/{session_id}")
+            if session is None:
+                # 404 from the server: task is finished. If the very first poll
+                # already returns None, the task simply finished before we got
+                # a chance to observe it - this is normal for very short reloads.
+                logger.info("Execution session %s no longer exists - reload "
+                            "of app \"%s\" has finished.", session_id, app_name)
+                break
 
-            result = (task.get("operational") or {}).get("lastExecutionResult") or {}
-            result_id = result.get("id")
-            status = result.get("status")
-            stop_time = result.get("stopTime")
+            logger.debug("Reload still in progress for app \"%s\" (elapsed: %.0fs)",
+                         app_name, elapsed)
 
-            # Three conditions must all be met for the run to count as
-            # finished: a new execution result, a terminal status and a
-            # real stopTime (i.e. not the .NET MinValue sentinel).
-            is_new_execution = result_id is not None and result_id != baseline_result_id
-            is_terminal = status in enums.ExecutionStatus.terminal_statuses()
-            has_real_stop_time = stop_time and stop_time != enums.DOTNET_MIN_DATETIME
+        # Fetch the final execution result for this session. With task retries
+        # configured there can be more than one result - we take the newest.
+        results = self.get(
+            endpoint="/qrs/executionresult/full",
+            params={
+                "filter": f"executionID eq {session_id}",
+                "orderby": "startTime desc",
+            },
+        )
+        if not results:
+            logger.error("Reload of app \"%s\" finished but no execution result "
+                         "was found for session %s.", app_name, session_id)
+            return None
 
-            if is_new_execution and is_terminal and has_real_stop_time:
-                success = status == enums.ExecutionStatus.FINISHED_SUCCESS
-                if success:
-                    logger.info("Reload of app \"%s\" finished successfully "
-                                "(duration: %s ms).",
-                                app_name, result.get("duration"))
-                else:
-                    logger.error("Reload of app \"%s\" finished with status %s "
-                                 "(duration: %s ms).",
-                                 app_name, status, result.get("duration"))
+        latest = results[0]
+        status = latest.get("status")
+        success = status == enums.ExecutionStatus.FINISHED_SUCCESS
 
-                return {
-                    "success": success,
-                    "task": task,
-                }
+        if success:
+            logger.info("Reload of app \"%s\" finished successfully "
+                        "(duration: %s ms).", app_name, latest.get("duration"))
+        else:
+            logger.error("Reload of app \"%s\" finished with status %s "
+                         "(duration: %s ms).",
+                         app_name, status, latest.get("duration"))
 
-            logger.debug("Reload still in progress for app \"%s\" "
-                         "(status: %s, elapsed: %.0fs)", app_name, status, elapsed)
+        return {
+            "success": success,
+            "task": task,
+        }
 
 
     def reloadtask_create(self, app_id, task_name, custom_properties=None, tags: list = None,

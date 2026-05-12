@@ -29,7 +29,7 @@ client = QRSClient(server_name="<server_name>", server_port=4242, auth_manager=a
 app_id = uuid.UUID("<app_id>")
 
 # Calls the API
-result = client.app_reload(app_id=app_id, poll_interval=5.0, timeout=1800.0)
+result = client.app_reload(app_id=app_id, poll_interval=5.0)
 
 if result:
     print("App reload started:", result)
