@@ -473,89 +473,124 @@ class QRSClient:
                              headers=headers, data=payload)
 
 
-    def app_reload(self, app_id: uuid.UUID, poll_interval: float = 5.0) -> dict:
+    def app_reload(self, id: uuid.UUID, poll_interval: float = 5.0) -> dict:
         """
-        Triggers a reload for the specified app by creating (or reusing) a
-        reload task named "Manually triggered reload of <app_name>", starting
-        it via the synchronous task start endpoint, and waiting for it to
-        complete by polling the execution session. Mimics the QMC's
-        "Reload now" functionality.
+        Triggers a reload, identified by either a reload task ID or an app
+        ID, and waits for it to complete. Mimics the QMC's "Reload now"
+        functionality.
 
-        Workflow (as documented by Qlik):
-            1. Verify that the app exists.
-            2. Look for an existing reload task named
-               "Manually triggered reload of <app_name>" for that app. If
-               no such task exists, create one via reloadtask_create() with
-               no schema events (only manually triggerable).
-            3. Start the task via POST /qrs/task/{id}/start/synchronous.
-               The server returns an execution session GUID. An empty GUID
-               (00000000-...) means the task could not be started (disabled,
-               no scheduler available, app not available).
-            4. Poll GET /qrs/executionsession/{id} until it returns 404
-               Not Found - that is the signal that the task has finished
-               and the execution session has been auto-deleted from the
-               repository.
-            5. Fetch the execution result via
-               GET /qrs/executionresult?filter=executionID eq <session_id>
-               to get the final status, duration and details.
+        The given ID is resolved in two steps:
+            1. The method first checks whether a reload task with that ID
+               exists. If so, the task is reused as-is (the method does
+               not create or modify anything). Only reload tasks (taskType
+               0) are accepted; tasks of other types are rejected.
+            2. If no reload task with that ID exists, the ID is treated as
+               an app ID. The method then looks for an existing reload
+               task named "Manually triggered reload of <app_name>" for
+               that app, creating one via reloadtask_create() if needed
+               (with no schema events, only manually triggerable).
+
+        Once a reload task has been resolved, the task is started via
+        POST /qrs/task/{id}/start/synchronous. The server returns an
+        execution session GUID. An empty GUID (00000000-...) means the
+        task could not be started (disabled, no scheduler available, app
+        not available).
+
+        The execution session is then polled via
+        GET /qrs/executionsession/{id} until it returns 404 Not Found -
+        per Qlik's documentation this indicates the task has finished and
+        the execution session entity has been deleted from the database.
+
+        Finally, the execution result is fetched via
+        GET /qrs/executionresult?filter=executionID eq <session_id>
+        to determine the final status, duration and details.
 
         Args:
-            app_id (UUID): The ID of the app to reload.
+            id (UUID): Either the ID of a reload task to start, or the ID
+                of an app to reload (resolved in that order).
             poll_interval (float, optional): Interval in seconds between
                 status checks. Default value is 5.0.
-            timeout (float, optional): Maximum time in seconds to wait for
-                the reload to complete. Default value is 3600.0 (1 hour).
 
         Returns:
             dict: A result dictionary with the following keys:
                 - "success" (bool): True if the reload completed successfully
                   (status FinishedSuccess), False otherwise.
                 - "task" (dict): The reload task object that was used.
-                Returns None if the app does not exist, the task could not
-                be created or started, or the timeout is reached.
+                Returns None if the ID could not be resolved to either a
+                reload task or an app, the task could not be created or
+                started, or no execution result was found afterwards.
         """
+        # Rebind to a local name so we don't shadow Python's built-in id()
+        # inside the method body.
+        _id = id
+
         _EMPTY_GUID = "00000000-0000-0000-0000-000000000000"
+        _TASK_TYPE_RELOAD = 0
 
-        # Verify that the app exists
-        app = self.get(endpoint=f"/qrs/app/{app_id}")
-        if not app:
-            logger.error("The app with ID \"%s\" does not exist!", app_id)
-            return None
+        # ------------------------------------------------------------------
+        # Resolve the given ID to a reload task
+        # ------------------------------------------------------------------
 
-        app_name = app.get("name", str(app_id))
-        task_name = f"Manually triggered reload of {app_name}"
-
-        # Look for an existing reload task with the conventional name for this app
-        existing_tasks = self.get(
-            endpoint="/qrs/reloadtask/full",
-            params={"filter": f"app.id eq {app_id} and name eq '{task_name}'"},
-        )
-
-        if existing_tasks:
-            task = existing_tasks[0]
-            logger.info("Reusing existing reload task \"%s\" (ID: %s) for app \"%s\".",
-                        task_name, task["id"], app_name)
+        # Step 1: try to interpret the ID as a reload task ID.
+        task = self.get(endpoint=f"/qrs/reloadtask/{_id}")
+        if task:
+            task_type = task.get("taskType")
+            if task_type != _TASK_TYPE_RELOAD:
+                logger.error("Task with ID \"%s\" exists but is not a reload "
+                             "task (taskType=%s).", _id, task_type)
+                return None
+            logger.info("Using existing reload task \"%s\" (ID: %s).",
+                        task.get("name", _id), task["id"])
         else:
-            logger.info("Creating reload task \"%s\" for app \"%s\".",
-                        task_name, app_name)
-            created_task = self.reloadtask_create(
-                app_id=str(app_id),
-                task_name=task_name,
-                task_type=0,
-                enabled=True,
-                is_manually_triggered=True,
-            )
-            if not created_task:
-                logger.error("Failed to create reload task for app \"%s\"!", app_name)
+            # Step 2: not a task ID - try to interpret it as an app ID.
+            app = self.get(endpoint=f"/qrs/app/{_id}")
+            if not app:
+                logger.error("No reload task or app with ID \"%s\" exists!", _id)
                 return None
 
-            # Get the structure of the new task
-            task = self.get(
+            app_id = _id
+            app_name = app.get("name", str(app_id))
+            task_name = f"Manually triggered reload of {app_name}"
+
+            # Look for an existing reload task with the conventional name
+            # for this app
+            existing_tasks = self.get(
                 endpoint="/qrs/reloadtask/full",
                 params={"filter": f"app.id eq {app_id} and name eq '{task_name}'"},
-            )[0]
+            )
+
+            if existing_tasks:
+                task = existing_tasks[0]
+                logger.info("Reusing existing reload task \"%s\" (ID: %s) "
+                            "for app \"%s\".",
+                            task_name, task["id"], app_name)
+            else:
+                logger.info("Creating reload task \"%s\" for app \"%s\".",
+                            task_name, app_name)
+                created_task = self.reloadtask_create(
+                    app_id=str(app_id),
+                    task_name=task_name,
+                    task_type=_TASK_TYPE_RELOAD,
+                    enabled=True,
+                    is_manually_triggered=True,
+                )
+                if not created_task:
+                    logger.error("Failed to create reload task for app \"%s\"!",
+                                 app_name)
+                    return None
+
+                # Re-fetch the new task by name to get its ID
+                task = self.get(
+                    endpoint="/qrs/reloadtask/full",
+                    params={"filter": f"app.id eq {app_id} and name eq '{task_name}'"},
+                )[0]
+
+        # ------------------------------------------------------------------
+        # Start the task and wait for the execution session to finish
+        # ------------------------------------------------------------------
 
         task_id = uuid.UUID(task["id"])
+        task_name = task.get("name", str(task_id))
 
         # Start the task synchronously - the server returns an execution
         # session GUID as soon as the task has been picked up by the scheduler.
@@ -594,11 +629,11 @@ class QRSClient:
                 # already returns None, the task simply finished before we got
                 # a chance to observe it - this is normal for very short reloads.
                 logger.info("Execution session %s no longer exists - reload "
-                            "of app \"%s\" has finished.", session_id, app_name)
+                            "task \"%s\" has finished.", session_id, task_name)
                 break
 
-            logger.debug("Reload still in progress for app \"%s\" (elapsed: %.0fs)",
-                         app_name, elapsed)
+            logger.debug("Reload task \"%s\" still in progress (elapsed: %.0fs)",
+                         task_name, elapsed)
 
         # Fetch the final execution result for this session. With task retries
         # configured there can be more than one result - we take the newest.
@@ -610,8 +645,8 @@ class QRSClient:
             },
         )
         if not results:
-            logger.error("Reload of app \"%s\" finished but no execution result "
-                         "was found for session %s.", app_name, session_id)
+            logger.error("Reload task \"%s\" finished but no execution result "
+                         "was found for session %s.", task_name, session_id)
             return None
 
         latest = results[0]
@@ -620,12 +655,12 @@ class QRSClient:
         success = status == 7
 
         if success:
-            logger.info("Reload of app \"%s\" finished successfully "
-                        "(duration: %s ms).", app_name, latest.get("duration"))
+            logger.info("Reload task \"%s\" finished successfully "
+                        "(duration: %s ms).", task_name, latest.get("duration"))
         else:
-            logger.error("Reload of app \"%s\" finished with status %s "
+            logger.error("Reload task \"%s\" finished with status %s "
                          "(duration: %s ms).",
-                         app_name, status, latest.get("duration"))
+                         task_name, status, latest.get("duration"))
 
         return {
             "success": success,
