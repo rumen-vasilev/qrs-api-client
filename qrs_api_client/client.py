@@ -15,7 +15,6 @@ import requests
 
 from qrs_api_client.auth import AuthManager
 import qrs_api_client.models as models
-import qrs_api_client.enums as enums
 
 
 logger = logging.getLogger(__name__)
@@ -49,6 +48,10 @@ class QRSClient:
         if auth_manager is None:
             auth_manager = AuthManager()
         self.session = auth_manager.get_auth(self.session, auth_method, verify_ssl)
+
+        # Cache for /qrs/about/api/enums - populated lazily on first get_enum() call.
+        # Maps enum_name (e.g. "TaskExecutionStatus") to a dict {value_name: int}.
+        self._enums_cache: dict | None = None
 
     def _request(self, method: str, endpoint: str, **kwargs):
         """
@@ -172,6 +175,81 @@ class QRSClient:
         if response is None:
             return None
         return response.json()
+
+
+    # ---------------------------------------------------------------------------------------------------------------- #
+    # Server-side enum lookups                                                                                         #
+    # ---------------------------------------------------------------------------------------------------------------- #
+
+    def get_enum(self, enum_name: str, value_name: str = None):
+        """
+        Retrieves enum values defined by the Qlik Repository Service.
+
+        On the first call the full enum table is fetched from
+        /qrs/about/api/enums and cached on the client instance. Subsequent
+        calls are served from the in-memory cache and do not perform any
+        HTTP request.
+
+        The /qrs/about/api/enums endpoint returns each value as a string
+        of the form "<int>: <name>" (e.g. "7: FinishedSuccess"); this method
+        parses that format and exposes the values as a dict mapping value
+        names to integers.
+
+        Args:
+            enum_name (str): The name of the enum (e.g. "TaskExecutionStatus",
+                "TaskTypeEnum").
+            value_name (str, optional): A specific value name within the
+                enum (e.g. "FinishedSuccess"). If provided, the integer
+                value is returned. If omitted, a dict {value_name: int}
+                with all values of the enum is returned.
+
+        Returns:
+            int: The integer value when value_name is given.
+            dict: A mapping {value_name: int} of all values when value_name
+                is None.
+            None: If the enum or the requested value does not exist on the
+                server.
+        """
+        # Populate cache on first use
+        if self._enums_cache is None:
+            raw = self.get(endpoint="/qrs/about/api/enums")
+            if raw is None:
+                logger.error("Failed to fetch enum definitions from "
+                             "/qrs/about/api/enums.")
+                return None
+
+            cache = {}
+            for name, definition in raw.items():
+                # Each entry has "values" as a list of "<int>: <name>" strings
+                parsed = {}
+                for item in definition.get("values", []):
+                    # Split only on the first colon — value names never
+                    # contain ":" but we stay defensive anyway
+                    int_part, _, name_part = item.partition(":")
+                    try:
+                        parsed[name_part.strip()] = int(int_part.strip())
+                    except ValueError:
+                        logger.warning("Unparseable enum entry in \"%s\": %r",
+                                       name, item)
+                cache[name] = parsed
+
+            self._enums_cache = cache
+            logger.debug("Cached %d enum definitions from QRS.", len(cache))
+
+        enum = self._enums_cache.get(enum_name)
+        if enum is None:
+            logger.error("Enum \"%s\" does not exist on the server.", enum_name)
+            return None
+
+        if value_name is None:
+            return enum
+
+        value = enum.get(value_name)
+        if value is None:
+            logger.error("Enum \"%s\" has no value named \"%s\". "
+                         "Available values: %s",
+                         enum_name, value_name, list(enum.keys()))
+        return value
 
 
     # ---------------------------------------------------------------------------------------------------------------- #
@@ -559,7 +637,8 @@ class QRSClient:
 
         latest = results[0]
         status = latest.get("status")
-        success = status == enums.ExecutionStatus.FINISHED_SUCCESS
+        # success = status == self.get_enum("TaskExecutionStatus", "FinishedSuccess")
+        success = status == 7
 
         if success:
             logger.info("Reload of app \"%s\" finished successfully "
