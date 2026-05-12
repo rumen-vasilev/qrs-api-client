@@ -49,10 +49,6 @@ class QRSClient:
             auth_manager = AuthManager()
         self.session = auth_manager.get_auth(self.session, auth_method, verify_ssl)
 
-        # Cache for /qrs/about/api/enums - populated lazily on first get_enum() call.
-        # Maps enum_name (e.g. "TaskExecutionStatus") to a dict {value_name: int}.
-        self._enums_cache: dict | None = None
-
     def _request(self, method: str, endpoint: str, **kwargs):
         """
         Executes an HTTP request to the QRS API.
@@ -181,75 +177,58 @@ class QRSClient:
     # Server-side enum lookups                                                                                         #
     # ---------------------------------------------------------------------------------------------------------------- #
 
-    def get_enum(self, enum_name: str, value_name: str = None):
+    def get_enum(self, schema_path: str) -> list[str] | None:
         """
-        Retrieves enum values defined by the Qlik Repository Service.
+        Retrieves the list of values for the enum that is used at a given
+        Qlik Sense schema path.
 
-        On the first call the full enum table is fetched from
-        /qrs/about/api/enums and cached on the client instance. Subsequent
-        calls are served from the in-memory cache and do not perform any
-        HTTP request.
+        Each Qlik object property whose type is an enum (e.g.
+        ExecutionResult.Status, ReloadTask.TaskType, App.AvailabilityStatus)
+        is associated with exactly one enum definition. This method fetches
+        the full enum table from /qrs/about/api/enums and looks up the
+        values for the property identified by the given schema path.
 
-        The /qrs/about/api/enums endpoint returns each value as a string
-        of the form "<int>: <name>" (e.g. "7: FinishedSuccess"); this method
-        parses that format and exposes the values as a dict mapping value
-        names to integers.
+        The returned list mirrors the raw server format - each entry is a
+        string of the form "<int>: <name>" (e.g. "7: FinishedSuccess").
 
         Args:
-            enum_name (str): The name of the enum (e.g. "TaskExecutionStatus",
-                "TaskTypeEnum").
-            value_name (str, optional): A specific value name within the
-                enum (e.g. "FinishedSuccess"). If provided, the integer
-                value is returned. If omitted, a dict {value_name: int}
-                with all values of the enum is returned.
+            schema_path (str): The schema path of the property whose enum
+                values should be returned (e.g. "ExecutionResult.Status",
+                "ReloadTask.TaskType", "App.AvailabilityStatus").
 
         Returns:
-            int: The integer value when value_name is given.
-            dict: A mapping {value_name: int} of all values when value_name
-                is None.
-            None: If the enum or the requested value does not exist on the
-                server.
+            list[str]: The list of enum value strings (e.g.
+                ["0: NeverStarted", "1: Triggered", ...]), or None if the
+                schema path is not associated with any enum on the server.
+
+        Examples:
+            >>> client.get_enum("ExecutionResult.Status")
+            ['0: NeverStarted', '1: Triggered', ..., '14: DistributionRunning']
+
+            >>> client.get_enum("ReloadTask.TaskType")
+            ['0: Reload', '1: ExternalProgram', '2: UserSync',
+             '3: Distribute', '4: Preload']
         """
-        # Populate cache on first use
-        if self._enums_cache is None:
-            raw = self.get(endpoint="/qrs/about/api/enums")
-            if raw is None:
-                logger.error("Failed to fetch enum definitions from "
-                             "/qrs/about/api/enums.")
-                return None
-
-            cache = {}
-            for name, definition in raw.items():
-                # Each entry has "values" as a list of "<int>: <name>" strings
-                parsed = {}
-                for item in definition.get("values", []):
-                    # Split only on the first colon — value names never
-                    # contain ":" but we stay defensive anyway
-                    int_part, _, name_part = item.partition(":")
-                    try:
-                        parsed[name_part.strip()] = int(int_part.strip())
-                    except ValueError:
-                        logger.warning("Unparseable enum entry in \"%s\": %r",
-                                       name, item)
-                cache[name] = parsed
-
-            self._enums_cache = cache
-            logger.debug("Cached %d enum definitions from QRS.", len(cache))
-
-        enum = self._enums_cache.get(enum_name)
-        if enum is None:
-            logger.error("Enum \"%s\" does not exist on the server.", enum_name)
+        raw = self.get(endpoint="/qrs/about/api/enums")
+        if raw is None:
+            logger.error("Failed to fetch enum definitions from "
+                         "/qrs/about/api/enums.")
             return None
 
-        if value_name is None:
-            return enum
+        # The server response is keyed by enum name (e.g. "TaskTypeEnum");
+        # we walk all definitions and return the values of the one whose
+        # "usages" list contains the requested schema path. A single enum
+        # may be referenced by multiple schema paths (e.g. EventTypeEnum is
+        # used by CompositeEvent.EventType, IEvent.EventType and
+        # SchemaEvent.EventType).
+        for definition in raw.values():
+            if schema_path.lower() in [u.lower() for u in definition.get("usages", [])]:
+                return definition.get("values", [])
 
-        value = enum.get(value_name)
-        if value is None:
-            logger.error("Enum \"%s\" has no value named \"%s\". "
-                         "Available values: %s",
-                         enum_name, value_name, list(enum.keys()))
-        return value
+        logger.error("No enum is defined for schema path \"%s\". "
+                     "Use a valid schema path such as "
+                     "\"ExecutionResult.Status\".", schema_path)
+        return None
 
 
     # ---------------------------------------------------------------------------------------------------------------- #
