@@ -96,7 +96,7 @@ class QRSClient:
     # Generic HTTP methods                                                                                             #
     # ---------------------------------------------------------------------------------------------------------------- #
 
-    def get(self, endpoint: str, params: dict = None, headers: dict = None) -> dict:
+    def get(self, endpoint: str, params: dict = None, headers: dict = None):
         """
         Executes a GET request to the QRS API.
 
@@ -111,9 +111,11 @@ class QRSClient:
         if headers is None:
             headers = {}
         response = self._request(method="GET", endpoint=endpoint, params=params, headers=headers)
-        if response is None:
-            return None
-        return response.json()
+        if isinstance(response, requests.Response):
+            return response.json()
+        else:
+            return response
+
 
     def post(self, endpoint: str, params: dict = None, headers: dict = None, data=None):
         """
@@ -132,10 +134,8 @@ class QRSClient:
             headers = {}
         response = self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data)
         if isinstance(response, requests.Response):
-            print("IF:",response)
             return response.json()
         else:
-            print("ELSE:", response)
             return response
 
 
@@ -156,9 +156,13 @@ class QRSClient:
         if headers is None:
             headers = {}
         response = self._request(method="PUT", endpoint=endpoint, params=params, headers=headers, data=data)
-        return response
+        if isinstance(response, requests.Response):
+            return response.json()
+        else:
+            return response
 
-    def delete(self, endpoint: str, params: dict = None) -> dict:
+
+    def delete(self, endpoint: str, params: dict = None):
         """
         Executes a DELETE request to the QRS API.
 
@@ -170,9 +174,10 @@ class QRSClient:
             dict: JSON response as a dictionary or None if an error occurs.
         """
         response = self._request(method="DELETE", endpoint=endpoint, params=params, headers={})
-        if response is None:
-            return None
-        return response.json()
+        if isinstance(response, requests.Response):
+            return response.json()
+        else:
+            return response
 
 
     # ---------------------------------------------------------------------------------------------------------------- #

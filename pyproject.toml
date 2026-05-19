@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qrs-api-client"
-version = "2.6.1"
+version = "2.7.0"
 description = "Python client for Qlik Sense Repository Service API."
 readme = "README.md"
 requires-python = ">=3.11"
