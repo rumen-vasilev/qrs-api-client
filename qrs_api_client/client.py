@@ -131,9 +131,11 @@ class QRSClient:
         if headers is None:
             headers = {}
         response = self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data)
-        if type(response) is dict:
+        if isinstance(response, requests.Response):
+            print("IF:",response)
             return response.json()
         else:
+            print("ELSE:", response)
             return response
 
 
@@ -601,7 +603,7 @@ class QRSClient:
             return None
 
         # Get the session id
-        session_id = start_response.json().get("value")
+        session_id = start_response.get("value")
         if not session_id or session_id == _EMPTY_GUID:
             logger.error("Reload task \"%s\" could not be started: the server "
                          "returned an empty session ID. The task may be disabled, "
