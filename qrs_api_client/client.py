@@ -539,13 +539,12 @@ class QRSClient:
         # ------------------------------------------------------------------
 
         # Step 1: try to interpret the ID as a reload task ID.
-        task = self.get(endpoint=f"/qrs/reloadtask/{_id}")
-        if task:
-            task_type = task.get("taskType")
-            if task_type != _TASK_TYPE_RELOAD:
-                logger.error("Task with ID \"%s\" exists but is not a reload "
-                             "task (taskType=%s).", _id, task_type)
-                return None
+        tasks = self.get(
+            endpoint="/qrs/reloadtask/full",
+            params={"filter": f"id eq {_id}"},
+        )
+        if tasks:
+            task = tasks[0]
             logger.info("Using existing reload task \"%s\" (ID: %s).",
                         task.get("name", _id), task["id"])
         else:
