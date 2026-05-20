@@ -92,7 +92,10 @@ class QRSClient:
         try:
             response = self.session.request(method, url, **kwargs)
             response.raise_for_status()
-            return response
+            if isinstance(response, requests.Response):
+                return response.json()
+            else:
+                return response
         except requests.exceptions.HTTPError as e:
             # If the failure is an expected non-2xx response for this call,
             # log it at DEBUG instead of ERROR so it doesn't pollute the logs.
@@ -132,10 +135,7 @@ class QRSClient:
             headers = {}
         response = self._request(method="GET", endpoint=endpoint, params=params, headers=headers,
                                  silent_status_codes=silent_status_codes)
-        if isinstance(response, requests.Response):
-            return response.json()
-        else:
-            return response
+        return response
 
 
     def post(self, endpoint: str, params: dict = None, headers: dict = None, data=None,
@@ -159,10 +159,7 @@ class QRSClient:
             headers = {}
         response = self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data,
                                  silent_status_codes=silent_status_codes)
-        if isinstance(response, requests.Response):
-            return response.json()
-        else:
-            return response
+        return response
 
 
     def put(self, endpoint: str, params: dict = None, headers: dict = None, data=None,
@@ -187,10 +184,7 @@ class QRSClient:
             headers = {}
         response = self._request(method="PUT", endpoint=endpoint, params=params, headers=headers, data=data,
                                  silent_status_codes=silent_status_codes)
-        if isinstance(response, requests.Response):
-            return response.json()
-        else:
-            return response
+        return response
 
 
     def delete(self, endpoint: str, params: dict = None, silent_status_codes: set = None):
@@ -209,10 +203,7 @@ class QRSClient:
         """
         response = self._request(method="DELETE", endpoint=endpoint, params=params, headers={},
                                  silent_status_codes=silent_status_codes)
-        if isinstance(response, requests.Response):
-            return response.json()
-        else:
-            return response
+        return response
 
 
     # ---------------------------------------------------------------------------------------------------------------- #
