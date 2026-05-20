@@ -49,13 +49,19 @@ class QRSClient:
             auth_manager = AuthManager()
         self.session = auth_manager.get_auth(self.session, auth_method, verify_ssl)
 
-    def _request(self, method: str, endpoint: str, **kwargs):
+    def _request(self, method: str, endpoint: str, silent_status_codes: set = None, **kwargs):
         """
         Executes an HTTP request to the QRS API.
 
         Args:
             method (str): HTTP method to use (e.g., "GET", "POST", "DELETE").
             endpoint (str): The API endpoint to call.
+            silent_status_codes (set, optional): A set of HTTP status codes
+                that are expected for this call and should NOT be logged as
+                errors when raised by raise_for_status(). They are logged at
+                DEBUG level instead. Useful for endpoints where a particular
+                non-2xx response carries semantic meaning (e.g. polling
+                /executionsession/{id} where 404 signals task completion).
             **kwargs: Additional arguments to pass to the request (e.g., params, data).
                       params should be a dict (e.g., {"skipData": "false"}) or None.
 
@@ -87,6 +93,16 @@ class QRSClient:
             response = self.session.request(method, url, **kwargs)
             response.raise_for_status()
             return response
+        except requests.exceptions.HTTPError as e:
+            # If the failure is an expected non-2xx response for this call,
+            # log it at DEBUG instead of ERROR so it doesn't pollute the logs.
+            status = e.response.status_code if e.response is not None else None
+            if silent_status_codes and status in silent_status_codes:
+                logger.debug("QRS request returned expected %s: %s %s",
+                             status, method, url)
+            else:
+                logger.error("QRS request failed: %s", e)
+            return None
         except requests.exceptions.RequestException as e:
             logger.error("QRS request failed: %s", e)
             return None
@@ -96,7 +112,8 @@ class QRSClient:
     # Generic HTTP methods                                                                                             #
     # ---------------------------------------------------------------------------------------------------------------- #
 
-    def get(self, endpoint: str, params: dict = None, headers: dict = None):
+    def get(self, endpoint: str, params: dict = None, headers: dict = None,
+            silent_status_codes: set = None):
         """
         Executes a GET request to the QRS API.
 
@@ -104,20 +121,25 @@ class QRSClient:
             endpoint (str): The API endpoint to call.
             params (dict, optional): Query parameters as key-value pairs.
             headers (dict, optional): Additional header parameters.
+            silent_status_codes (set, optional): HTTP status codes that are
+                expected for this call and should be logged at DEBUG instead
+                of ERROR when they occur (see _request for details).
 
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
         """
         if headers is None:
             headers = {}
-        response = self._request(method="GET", endpoint=endpoint, params=params, headers=headers)
+        response = self._request(method="GET", endpoint=endpoint, params=params, headers=headers,
+                                 silent_status_codes=silent_status_codes)
         if isinstance(response, requests.Response):
             return response.json()
         else:
             return response
 
 
-    def post(self, endpoint: str, params: dict = None, headers: dict = None, data=None):
+    def post(self, endpoint: str, params: dict = None, headers: dict = None, data=None,
+             silent_status_codes: set = None):
         """
         Executes a POST request to the QRS API.
 
@@ -126,20 +148,25 @@ class QRSClient:
             params (dict, optional): Query parameters as key-value pairs.
             headers (dict, optional): Additional header parameters.
             data (dict or str, optional): The JSON payload to include in the request body.
+            silent_status_codes (set, optional): HTTP status codes that are
+                expected for this call and should be logged at DEBUG instead
+                of ERROR when they occur (see _request for details).
 
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
         """
         if headers is None:
             headers = {}
-        response = self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data)
+        response = self._request(method="POST", endpoint=endpoint, params=params, headers=headers, data=data,
+                                 silent_status_codes=silent_status_codes)
         if isinstance(response, requests.Response):
             return response.json()
         else:
             return response
 
 
-    def put(self, endpoint: str, params: dict = None, headers: dict = None, data=None):
+    def put(self, endpoint: str, params: dict = None, headers: dict = None, data=None,
+            silent_status_codes: set = None):
         """
         Executes a PUT request to the QRS API.
 
@@ -149,31 +176,39 @@ class QRSClient:
             headers (dict, optional):
             data:
             payload:
+            silent_status_codes (set, optional): HTTP status codes that are
+                expected for this call and should be logged at DEBUG instead
+                of ERROR when they occur (see _request for details).
 
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
         """
         if headers is None:
             headers = {}
-        response = self._request(method="PUT", endpoint=endpoint, params=params, headers=headers, data=data)
+        response = self._request(method="PUT", endpoint=endpoint, params=params, headers=headers, data=data,
+                                 silent_status_codes=silent_status_codes)
         if isinstance(response, requests.Response):
             return response.json()
         else:
             return response
 
 
-    def delete(self, endpoint: str, params: dict = None):
+    def delete(self, endpoint: str, params: dict = None, silent_status_codes: set = None):
         """
         Executes a DELETE request to the QRS API.
 
         Args:
             endpoint (str): The API endpoint to call.
             params (dict, optional): Query parameters as key-value pairs.
+            silent_status_codes (set, optional): HTTP status codes that are
+                expected for this call and should be logged at DEBUG instead
+                of ERROR when they occur (see _request for details).
 
         Returns:
             dict: JSON response as a dictionary or None if an error occurs.
         """
-        response = self._request(method="DELETE", endpoint=endpoint, params=params, headers={})
+        response = self._request(method="DELETE", endpoint=endpoint, params=params, headers={},
+                                 silent_status_codes=silent_status_codes)
         if isinstance(response, requests.Response):
             return response.json()
         else:
@@ -629,7 +664,8 @@ class QRSClient:
 
             time.sleep(poll_interval)
 
-            session = self.get(endpoint=f"/qrs/executionsession/{session_id}")
+            session = self.get(endpoint=f"/qrs/executionsession/{session_id}",
+                               silent_status_codes={404})
             if session is None:
                 # 404 from the server: task is finished. If the very first poll
                 # already returns None, the task simply finished before we got
