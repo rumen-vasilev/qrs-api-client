@@ -268,6 +268,61 @@ class QRSClient:
     # High-level convenience methods                                                                                   #
     # ---------------------------------------------------------------------------------------------------------------- #
 
+    def app_get_id(self, app_name: str, stream_name: str = None) -> list[uuid.UUID]:
+        """
+        Resolves an app name to the IDs of all apps with that name.
+
+        Since several apps in Qlik Sense can share the same name, this method
+        always returns a list. When stream_name is given, the search is
+        additionally restricted to apps published to the stream with that
+        name.
+
+        The lookup uses the server-side QRS filter on /qrs/app/full, mirroring
+        the filtering pattern used elsewhere in this client (e.g. app_reload,
+        app_change_owner).
+
+        Args:
+            app_name (str): The name of the app(s) to look up.
+            stream_name (str, optional): If given, only apps published to the
+                stream with this name are returned. Apps that are not
+                published to any stream never match a stream filter.
+
+        Returns:
+            list[uuid.UUID]: The IDs of all matching apps. An empty list if no
+                app matches or the request fails.
+
+        Examples:
+            >>> client.app_get_id("Sales Dashboard")
+            [UUID('12345678-1234-1234-1234-1234567890ab')]
+
+            >>> client.app_get_id("Sales Dashboard", stream_name="Everyone")
+            [UUID('12345678-1234-1234-1234-1234567890ab')]
+
+            >>> client.app_get_id("Does not exist")
+            []
+        """
+        # Build the server-side filter. When a stream name is given, restrict
+        # the search to apps published to that stream.
+        if stream_name is not None:
+            _filter = f"name eq '{app_name}' and stream.name eq '{stream_name}'"
+        else:
+            _filter = f"name eq '{app_name}'"
+
+        apps = self.get(endpoint="/qrs/app/full", params={"filter": _filter})
+
+        # self.get returns None on a request error; treat it like "no matches"
+        # so the return type stays a stable list.
+        if not apps:
+            if stream_name is not None:
+                logger.warning("No app named \"%s\" found in stream \"%s\".",
+                               app_name, stream_name)
+            else:
+                logger.warning("No app named \"%s\" found.", app_name)
+            return []
+
+        return [uuid.UUID(app["id"]) for app in apps]
+
+
     def app_get_custom_properties(self, app_id: uuid.UUID) -> list:
         """
         Exports the custom properties of certain app as JSON.
