@@ -323,6 +323,45 @@ class QRSClient:
         return [uuid.UUID(app["id"]) for app in apps]
 
 
+    def stream_get_id(self, stream_name: str) -> list[uuid.UUID]:
+        """
+        Resolves a stream name to the IDs of all streams with that name.
+
+        The output format matches app_get_id: this method always returns a
+        list of uuid.UUID. Stream names are normally unique in Qlik Sense,
+        but a list is used for a consistent return type and to cover the
+        theoretical case of duplicate names.
+
+        The lookup uses the server-side QRS filter on /qrs/stream/full,
+        mirroring app_get_id.
+
+        Args:
+            stream_name (str): The name of the stream(s) to look up.
+
+        Returns:
+            list[uuid.UUID]: The IDs of all matching streams. An empty list
+                if no stream matches or the request fails.
+
+        Examples:
+            >>> client.stream_get_id("Everyone")
+            [UUID('12345678-1234-1234-1234-1234567890ab')]
+
+            >>> client.stream_get_id("Does not exist")
+            []
+        """
+        _filter = f"name eq '{stream_name}'"
+
+        streams = self.get(endpoint="/qrs/stream/full", params={"filter": _filter})
+
+        # self.get returns None on a request error; treat it like "no matches"
+        # so the return type stays a stable list.
+        if not streams:
+            logger.warning("No stream named \"%s\" found.", stream_name)
+            return []
+
+        return [uuid.UUID(stream["id"]) for stream in streams]
+
+
     def app_get_custom_properties(self, app_id: uuid.UUID) -> list:
         """
         Exports the custom properties of certain app as JSON.
