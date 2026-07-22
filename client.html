@@ -1,0 +1,766 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QRS API Client &mdash; QRS API Client 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=51b770b3"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="QRS API Models" href="models.html" />
+    <link rel="prev" title="QRS API Client documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            QRS API Client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">QRS API Client</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qrs_api_client.client.QRSClient"><code class="docutils literal notranslate"><span class="pre">QRSClient</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_change_owner"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_change_owner()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_export"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_export()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_get_custom_properties"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_get_custom_properties()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_get_id"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_get_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_get_owner"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_get_owner()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_get_tags"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_get_tags()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_reload"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_reload()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_set_custom_properties"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_set_custom_properties()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_set_tags"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_set_tags()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_upload"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_upload()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.app_upload_replace"><code class="docutils literal notranslate"><span class="pre">QRSClient.app_upload_replace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.create_custom_properties"><code class="docutils literal notranslate"><span class="pre">QRSClient.create_custom_properties()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.create_custom_property"><code class="docutils literal notranslate"><span class="pre">QRSClient.create_custom_property()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.create_tag"><code class="docutils literal notranslate"><span class="pre">QRSClient.create_tag()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.create_tags"><code class="docutils literal notranslate"><span class="pre">QRSClient.create_tags()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.delete"><code class="docutils literal notranslate"><span class="pre">QRSClient.delete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.get"><code class="docutils literal notranslate"><span class="pre">QRSClient.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.get_enum"><code class="docutils literal notranslate"><span class="pre">QRSClient.get_enum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.post"><code class="docutils literal notranslate"><span class="pre">QRSClient.post()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.put"><code class="docutils literal notranslate"><span class="pre">QRSClient.put()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.reloadtask_create"><code class="docutils literal notranslate"><span class="pre">QRSClient.reloadtask_create()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qrs_api_client.client.QRSClient.stream_get_id"><code class="docutils literal notranslate"><span class="pre">QRSClient.stream_get_id()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">QRS API Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auth.html">QRS API Authentication</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QRS API Client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">QRS API Client</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/client.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qrs_api_client.client">
+<span id="qrs-api-client"></span><h1>QRS API Client<a class="headerlink" href="#module-qrs_api_client.client" title="Link to this heading"></a></h1>
+<p>QRS API Client for Qlik Sense Enterprise.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qrs_api_client.client.</span></span><span class="sig-name descname"><span class="pre">QRSClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_manager</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="auth.html#qrs_api_client.auth.AuthManager" title="qrs_api_client.auth.AuthManager"><span class="pre">AuthManager</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify_ssl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Client for interacting with the Qlik Repository Service (QRS) API.</p>
+<p>Provides methods for establishing a session and performing CRUD operations on QRS entities.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_change_owner">
+<span class="sig-name descname"><span class="pre">app_change_owner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_change_owner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_change_owner" title="Link to this definition"></a></dt>
+<dd><p>Changes the owner of certain app.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app_id</strong> (<em>UUID</em>) – The ID of the app.</p></li>
+<li><p><strong>user_directory</strong> (<em>str</em>) – The user directory of the new owner.</p></li>
+<li><p><strong>user_id</strong> (<em>str</em>) – The user id of the new owner.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a dict.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_export">
+<span class="sig-name descname"><span class="pre">app_export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_export" title="Link to this definition"></a></dt>
+<dd><p>Exports an app in a two-step process using POST and GET methods.</p>
+<dl class="simple">
+<dt>Step 1: POST to /qrs/app/{id}/export/{token} to trigger the export.</dt><dd><p>The API returns JSON with a ‘downloadPath’ field.</p>
+</dd>
+</dl>
+<p>Step 2: GET the downloadPath to download the binary .qvf file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app_id</strong> (<em>UUID</em>) – The ID of the app to be exported.</p></li>
+<li><p><strong>file_path</strong> (<em>str</em>) – The directory path where the exported app should be stored.</p></li>
+<li><p><strong>file_name</strong> (<em>str</em><em>, </em><em>optional</em>) – File name for the exported app (e.g., “MyApp.qvf”). Falls kein Wert übergeben</p></li>
+<li><p><strong>wurde</strong></p></li>
+<li><p><strong>genommen.</strong> (<em>wird der ursprüngliche Name der Datei</em>)</p></li>
+<li><p><strong>skip_data</strong></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Success message with file name and path, or None if an error occurs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_get_custom_properties">
+<span class="sig-name descname"><span class="pre">app_get_custom_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_get_custom_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_get_custom_properties" title="Link to this definition"></a></dt>
+<dd><p>Exports the custom properties of certain app as JSON.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app_id</strong> (<em>UUID</em>) – The ID of the app.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_get_id">
+<span class="sig-name descname"><span class="pre">app_get_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">UUID</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_get_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_get_id" title="Link to this definition"></a></dt>
+<dd><p>Resolves an app name to the IDs of all apps with that name.</p>
+<p>Since several apps in Qlik Sense can share the same name, this method
+always returns a list. When stream_name is given, the search is
+additionally restricted to apps published to the stream with that
+name.</p>
+<p>The lookup uses the server-side QRS filter on /qrs/app/full, mirroring
+the filtering pattern used elsewhere in this client (e.g. app_reload,
+app_change_owner).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app_name</strong> (<em>str</em>) – The name of the app(s) to look up.</p></li>
+<li><p><strong>stream_name</strong> (<em>str</em><em>, </em><em>optional</em>) – If given, only apps published to the
+stream with this name are returned. Apps that are not
+published to any stream never match a stream filter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The IDs of all matching apps. An empty list if no</dt><dd><p>app matches or the request fails.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[uuid.UUID]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">app_get_id</span><span class="p">(</span><span class="s2">&quot;Sales Dashboard&quot;</span><span class="p">)</span>
+<span class="go">[UUID(&#39;12345678-1234-1234-1234-1234567890ab&#39;)]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">app_get_id</span><span class="p">(</span><span class="s2">&quot;Sales Dashboard&quot;</span><span class="p">,</span> <span class="n">stream_name</span><span class="o">=</span><span class="s2">&quot;Everyone&quot;</span><span class="p">)</span>
+<span class="go">[UUID(&#39;12345678-1234-1234-1234-1234567890ab&#39;)]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">app_get_id</span><span class="p">(</span><span class="s2">&quot;Does not exist&quot;</span><span class="p">)</span>
+<span class="go">[]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_get_owner">
+<span class="sig-name descname"><span class="pre">app_get_owner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_get_owner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_get_owner" title="Link to this definition"></a></dt>
+<dd><p>Exports the owner of certain app as JSON.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app_id</strong> (<em>UUID</em>) – The ID of the app.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a dict.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_get_tags">
+<span class="sig-name descname"><span class="pre">app_get_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_get_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_get_tags" title="Link to this definition"></a></dt>
+<dd><p>Exports the tags of certain app as JSON.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app_id</strong> (<em>UUID</em>) – The ID of the app.</p></li>
+<li><p><strong>tags</strong> (<em>list</em>) – List with tags to be imported.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_reload">
+<span class="sig-name descname"><span class="pre">app_reload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poll_interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_reload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_reload" title="Link to this definition"></a></dt>
+<dd><p>Triggers a reload, identified by either a reload task ID or an app
+ID, and waits for it to complete. Mimics the QMC’s “Reload now”
+functionality.</p>
+<dl class="simple">
+<dt>The given ID is resolved in two steps:</dt><dd><ol class="arabic simple">
+<li><p>The method first checks whether a reload task with that ID
+exists. If so, the task is reused as-is (the method does
+not create or modify anything). Only reload tasks (taskType
+0) are accepted; tasks of other types are rejected.</p></li>
+<li><p>If no reload task with that ID exists, the ID is treated as
+an app ID. The method then looks for an existing reload
+task named “Manually triggered reload of &lt;app_name&gt;” for
+that app, creating one via reloadtask_create() if needed
+(with no schema events, only manually triggerable).</p></li>
+</ol>
+</dd>
+</dl>
+<p>Once a reload task has been resolved, the task is started via
+POST /qrs/task/{id}/start/synchronous. The server returns an
+execution session GUID. An empty GUID (00000000-…) means the
+task could not be started (disabled, no scheduler available, app
+not available).</p>
+<p>The execution session is then polled via
+GET /qrs/executionsession/{id} until it returns 404 Not Found -
+per Qlik’s documentation this indicates the task has finished and
+the execution session entity has been deleted from the database.</p>
+<p>Finally, the execution result is fetched via
+GET /qrs/executionresult?filter=executionID eq &lt;session_id&gt;
+to determine the final status, duration and details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>UUID</em>) – Either the ID of a reload task to start, or the ID
+of an app to reload (resolved in that order).</p></li>
+<li><p><strong>poll_interval</strong> (<em>float</em><em>, </em><em>optional</em>) – Interval in seconds between
+status checks. Default value is 5.0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>A result dictionary with the following keys:</dt><dd><ul class="simple">
+<li><p>”success” (bool): True if the reload completed successfully
+(status FinishedSuccess), False otherwise.</p></li>
+<li><p>”task” (dict): The reload task object that was used.</p></li>
+</ul>
+<p>Returns None if the ID could not be resolved to either a
+reload task or an app, the task could not be created or
+started, or no execution result was found afterwards.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_set_custom_properties">
+<span class="sig-name descname"><span class="pre">app_set_custom_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_set_custom_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_set_custom_properties" title="Link to this definition"></a></dt>
+<dd><p>Inserts custom properties into an app.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app_id</strong> (<em>UUID</em>) – The ID of the app.</p></li>
+<li><p><strong>custom_properties</strong> (<em>dict</em>) – Custom property with name and values to be inserted. The values have a ‘list’ as data type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_set_tags">
+<span class="sig-name descname"><span class="pre">app_set_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_set_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_set_tags" title="Link to this definition"></a></dt>
+<dd><p>Inserts tags into an app.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app_id</strong> (<em>UUID</em>) – The ID of the app.</p></li>
+<li><p><strong>tags</strong> (<em>list</em>) – The tags of the app.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_upload">
+<span class="sig-name descname"><span class="pre">app_upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_connections</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_upload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_upload" title="Link to this definition"></a></dt>
+<dd><p>Executes a POST request to the QRS API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app_name</strong> (<em>str</em>) – The name of the app after upload.</p></li>
+<li><p><strong>file_name</strong> (<em>str</em>) – The path to the file.</p></li>
+<li><p><strong>exclude_connections</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to true and the uploaded .qvf file contains any data connections, they will not be imported to the system. The default value is false.</p></li>
+<li><p><strong>keep_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to false and the uploaded .qvf file contains app data, the data will be silently discarded. The default value is true.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.app_upload_replace">
+<span class="sig-name descname"><span class="pre">app_upload_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_app_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.app_upload_replace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.app_upload_replace" title="Link to this definition"></a></dt>
+<dd><p>Executes a POST request to the QRS API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_app_id</strong> (<em>UUID</em>) – The ID of the app to be replaced.</p></li>
+<li><p><strong>file_name</strong> (<em>str</em>) – The path to the file.</p></li>
+<li><p><strong>keep_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to false and the uploaded .qvf file contains app data, the data will be silently discarded. The default value is true.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.create_custom_properties">
+<span class="sig-name descname"><span class="pre">create_custom_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.create_custom_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.create_custom_properties" title="Link to this definition"></a></dt>
+<dd><p>Creates multiple custom property definitions in a single API call.</p>
+<p>Uses the bulk endpoint POST /qrs/custompropertydefinition/many to create
+several custom property definitions at once. Each entry in the input
+list is expected to be a custom property definition dict as produced by
+models.custom_property_definition(). Already existing definitions and
+duplicates within the input list are filtered out (case-insensitive,
+by name). If no definitions remain after filtering, no request is sent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>properties</strong> (<em>list</em><em>[</em><em>dict</em><em>]</em>) – List of custom property definition dicts
+(e.g. produced by models.custom_property_definition()) to be
+created. Already existing names and duplicates within the list
+are skipped and logged as errors.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>JSON response from the API containing the created</dt><dd><p>custom property definitions, or None if no new definitions
+remain to be created after filtering.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.create_custom_property">
+<span class="sig-name descname"><span class="pre">create_custom_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.create_custom_property"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.create_custom_property" title="Link to this definition"></a></dt>
+<dd><p>Creates a single custom property definition via the Qlik Repository Service.</p>
+<p>Retrieves all existing custom property definitions first and checks
+case-insensitively whether a definition with the given name already
+exists. If not, a new custom property definition is created via the
+POST /qrs/custompropertydefinition endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the custom property definition to create.
+Comparison with existing definitions is case-insensitive.</p></li>
+<li><p><strong>value_type</strong> (<em>str</em><em>, </em><em>optional</em>) – The type of value the property accepts
+(e.g. “Text”). Default value is “Text”.</p></li>
+<li><p><strong>choice_values</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Predefined choice values for
+the property. Only relevant when the property should be
+restricted to a fixed set of values.</p></li>
+<li><p><strong>object_types</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – List of object types the
+property can be applied to (e.g. [“App”, “Stream”]).</p></li>
+<li><p><strong>description</strong> (<em>str</em><em>, </em><em>optional</em>) – A description of the custom property
+definition.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>JSON response from the API containing the created custom</dt><dd><p>property definition, or None if a definition with the given
+name already exists.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.create_tag">
+<span class="sig-name descname"><span class="pre">create_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.create_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.create_tag" title="Link to this definition"></a></dt>
+<dd><p>Creates a single tag via the Qlik Repository Service.</p>
+<p>Retrieves all existing tags first and checks case-insensitively whether
+a tag with the given name already exists. If not, a new tag is created
+via the POST /qrs/tag endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the tag to create. Comparison with existing
+tags is case-insensitive.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>JSON response from the API containing the created tag, or</dt><dd><p>None if a tag with the given name already exists.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.create_tags">
+<span class="sig-name descname"><span class="pre">create_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.create_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.create_tags" title="Link to this definition"></a></dt>
+<dd><p>Creates multiple tags in a single API call.</p>
+<p>Uses the bulk endpoint POST /qrs/tag/many to create several tags at once.
+Before sending the request, both already existing tags and duplicates
+within the input list are filtered out (case-insensitive). If no tags
+remain after filtering, no request is sent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of tag names to create. Already existing
+names and duplicates within the list are skipped and logged
+as errors.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>JSON response from the API containing the created tags,</dt><dd><p>or None if no new tags remain to be created after filtering.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent_status_codes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.delete" title="Link to this definition"></a></dt>
+<dd><p>Executes a DELETE request to the QRS API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>endpoint</strong> (<em>str</em>) – The API endpoint to call.</p></li>
+<li><p><strong>params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Query parameters as key-value pairs.</p></li>
+<li><p><strong>silent_status_codes</strong> (<em>set</em><em>, </em><em>optional</em>) – HTTP status codes that are
+expected for this call and should be logged at DEBUG instead
+of ERROR when they occur (see _request for details).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a dictionary or None if an error occurs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent_status_codes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.get" title="Link to this definition"></a></dt>
+<dd><p>Executes a GET request to the QRS API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>endpoint</strong> (<em>str</em>) – The API endpoint to call.</p></li>
+<li><p><strong>params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Query parameters as key-value pairs.</p></li>
+<li><p><strong>headers</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional header parameters.</p></li>
+<li><p><strong>silent_status_codes</strong> (<em>set</em><em>, </em><em>optional</em>) – HTTP status codes that are
+expected for this call and should be logged at DEBUG instead
+of ERROR when they occur (see _request for details).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a dictionary or None if an error occurs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.get_enum">
+<span class="sig-name descname"><span class="pre">get_enum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.get_enum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.get_enum" title="Link to this definition"></a></dt>
+<dd><p>Retrieves the list of values for the enum that is used at a given
+Qlik Sense schema path.</p>
+<p>Each Qlik object property whose type is an enum (e.g.
+ExecutionResult.Status, ReloadTask.TaskType, App.AvailabilityStatus)
+is associated with exactly one enum definition. This method fetches
+the full enum table from /qrs/about/api/enums and looks up the
+values for the property identified by the given schema path.</p>
+<p>The returned list mirrors the raw server format - each entry is a
+string of the form “&lt;int&gt;: &lt;name&gt;” (e.g. “7: FinishedSuccess”).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>schema_path</strong> (<em>str</em>) – The schema path of the property whose enum
+values should be returned (e.g. “ExecutionResult.Status”,
+“ReloadTask.TaskType”, “App.AvailabilityStatus”).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The list of enum value strings (e.g.</dt><dd><p>[“0: NeverStarted”, “1: Triggered”, …]), or None if the
+schema path is not associated with any enum on the server.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">get_enum</span><span class="p">(</span><span class="s2">&quot;ExecutionResult.Status&quot;</span><span class="p">)</span>
+<span class="go">[&#39;0: NeverStarted&#39;, &#39;1: Triggered&#39;, ..., &#39;14: DistributionRunning&#39;]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">get_enum</span><span class="p">(</span><span class="s2">&quot;ReloadTask.TaskType&quot;</span><span class="p">)</span>
+<span class="go">[&#39;0: Reload&#39;, &#39;1: ExternalProgram&#39;, &#39;2: UserSync&#39;,</span>
+<span class="go"> &#39;3: Distribute&#39;, &#39;4: Preload&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent_status_codes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.post" title="Link to this definition"></a></dt>
+<dd><p>Executes a POST request to the QRS API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>endpoint</strong> (<em>str</em>) – The API endpoint to call.</p></li>
+<li><p><strong>params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Query parameters as key-value pairs.</p></li>
+<li><p><strong>headers</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional header parameters.</p></li>
+<li><p><strong>data</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – The JSON payload to include in the request body.</p></li>
+<li><p><strong>silent_status_codes</strong> (<em>set</em><em>, </em><em>optional</em>) – HTTP status codes that are
+expected for this call and should be logged at DEBUG instead
+of ERROR when they occur (see _request for details).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a dictionary or None if an error occurs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent_status_codes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.put"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.put" title="Link to this definition"></a></dt>
+<dd><p>Executes a PUT request to the QRS API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>endpoint</strong> (<em>str</em>) – The API endpoint to call.</p></li>
+<li><p><strong>params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Query parameters as key-value pairs.</p></li>
+<li><p><strong>headers</strong> (<em>dict</em><em>, </em><em>optional</em>)</p></li>
+<li><p><strong>data</strong></p></li>
+<li><p><strong>payload</strong></p></li>
+<li><p><strong>silent_status_codes</strong> (<em>set</em><em>, </em><em>optional</em>) – HTTP status codes that are
+expected for this call and should be logged at DEBUG instead
+of ERROR when they occur (see _request for details).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response as a dictionary or None if an error occurs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.reloadtask_create">
+<span class="sig-name descname"><span class="pre">reloadtask_create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_by_user_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_events</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composite_events</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">privileges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_session_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_retries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_manually_triggered</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operational</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_partial_reload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_to_live</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preload_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.reloadtask_create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.reloadtask_create" title="Link to this definition"></a></dt>
+<dd><p>Creates a reload task for a specified app.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app_id</strong> (<em>str</em>) – The ID of the app for which the task is created.</p></li>
+<li><p><strong>task_name</strong> (<em>str</em>) – The name of the reload task to create.</p></li>
+<li><p><strong>custom_properties</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary of custom property IDs and their values.</p></li>
+<li><p><strong>tags</strong> (<em>list</em><em>, </em><em>optional</em>) – List of tag IDs to associate with the task.</p></li>
+<li><p><strong>schema_events</strong> (<em>list</em><em>, </em><em>optional</em>) – List of schema events to schedule the task.</p></li>
+<li><p><strong>composite_events</strong> (<em>list</em><em>, </em><em>optional</em>) – List of composite events to schedule the task.</p></li>
+<li><p><strong>schema_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Schema path.</p></li>
+<li><p><strong>privileges</strong> (<em>list</em><em>, </em><em>optional</em>) – Privileges.</p></li>
+<li><p><strong>task_type</strong> (<em>int</em><em>, </em><em>optional</em>) – Task type. Default value is 0.</p></li>
+<li><p><strong>enabled</strong> (<em>bool</em><em>, </em><em>optional</em>) – True, if the task is active. Default value is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response from the API or None if an error occurs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qrs_api_client.client.QRSClient.stream_get_id">
+<span class="sig-name descname"><span class="pre">stream_get_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">UUID</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/qrs_api_client/client.html#QRSClient.stream_get_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qrs_api_client.client.QRSClient.stream_get_id" title="Link to this definition"></a></dt>
+<dd><p>Resolves a stream name to the IDs of all streams with that name.</p>
+<p>The output format matches app_get_id: this method always returns a
+list of uuid.UUID. Stream names are normally unique in Qlik Sense,
+but a list is used for a consistent return type and to cover the
+theoretical case of duplicate names.</p>
+<p>The lookup uses the server-side QRS filter on /qrs/stream/full,
+mirroring app_get_id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>stream_name</strong> (<em>str</em>) – The name of the stream(s) to look up.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The IDs of all matching streams. An empty list</dt><dd><p>if no stream matches or the request fails.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[uuid.UUID]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">stream_get_id</span><span class="p">(</span><span class="s2">&quot;Everyone&quot;</span><span class="p">)</span>
+<span class="go">[UUID(&#39;12345678-1234-1234-1234-1234567890ab&#39;)]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">stream_get_id</span><span class="p">(</span><span class="s2">&quot;Does not exist&quot;</span><span class="p">)</span>
+<span class="go">[]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="QRS API Client documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="models.html" class="btn btn-neutral float-right" title="QRS API Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Rumen Vasilev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

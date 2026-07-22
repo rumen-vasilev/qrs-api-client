@@ -1,0 +1,1238 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qrs_api_client.client &mdash; QRS API Client 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            QRS API Client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../client.html">QRS API Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">QRS API Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auth.html">QRS API Authentication</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QRS API Client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qrs_api_client.client</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qrs_api_client.client</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">QRS API Client for Qlik Sense Enterprise.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">unquote</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">qrs_api_client.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthManager</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">qrs_api_client.models</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">models</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="QRSClient">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">QRSClient</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Client for interacting with the Qlik Repository Service (QRS) API.</span>
+
+<span class="sd">    Provides methods for establishing a session and performing CRUD operations on QRS entities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">server_port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">auth_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">auth_manager</span><span class="p">:</span> <span class="n">AuthManager</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the QRSClient instance and establishes a session with the Qlik Sense Repository Service.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            server_name (str): The hostname or domain name of the server.</span>
+<span class="sd">            server_port (int): The port number of the server (e.g., 4242).</span>
+<span class="sd">            auth_manager (AuthManager): An instance of AuthManager for handling authentication.</span>
+<span class="sd">            auth_method (str): The authentication method to use (e.g., &quot;ntlm&quot; or &quot;cert&quot;).</span>
+<span class="sd">            verify_ssl (bool or str, optional): Boolean or path to a root.pem file for SSL verification.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xrf</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">server_name</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">server_port</span><span class="p">)</span> <span class="c1">#+ &quot;/qrs&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auth_method</span> <span class="o">=</span> <span class="n">auth_method</span>
+
+        <span class="c1"># Initialize authentication manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>  <span class="c1"># Initialize session</span>
+        <span class="k">if</span> <span class="n">auth_manager</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">auth_manager</span> <span class="o">=</span> <span class="n">AuthManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">auth_manager</span><span class="o">.</span><span class="n">get_auth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">auth_method</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">silent_status_codes</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes an HTTP request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            method (str): HTTP method to use (e.g., &quot;GET&quot;, &quot;POST&quot;, &quot;DELETE&quot;).</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            silent_status_codes (set, optional): A set of HTTP status codes</span>
+<span class="sd">                that are expected for this call and should NOT be logged as</span>
+<span class="sd">                errors when raised by raise_for_status(). They are logged at</span>
+<span class="sd">                DEBUG level instead. Useful for endpoints where a particular</span>
+<span class="sd">                non-2xx response carries semantic meaning (e.g. polling</span>
+<span class="sd">                /executionsession/{id} where 404 signals task completion).</span>
+<span class="sd">            **kwargs: Additional arguments to pass to the request (e.g., params, data).</span>
+<span class="sd">                      params should be a dict (e.g., {&quot;skipData&quot;: &quot;false&quot;}) or None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            requests.Response: Response object or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Build query parameters — Xrfkey is always required</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;params&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Xrfkey&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xrf</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
+
+        <span class="c1"># Construct the url</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="si">}{</span><span class="n">endpoint</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Construct the headers</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;X-Qlik-Xrfkey&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">xrf</span><span class="p">,</span> <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;X-Qlik-User&quot;</span><span class="p">:</span> <span class="s2">&quot;UserDirectory=INTERNAL;UserID=sa_repository&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span> <span class="s2">&quot;Connection&quot;</span><span class="p">:</span> <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth_method</span> <span class="o">==</span> <span class="s2">&quot;ntlm&quot;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;User-Agent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36&quot;</span>
+            <span class="n">headers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;X-Qlik-User&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Merge the headers passed from another method</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;headers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">headers</span> <span class="o">|</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="p">{})</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;QRS request: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> params=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">response</span>
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">HTTPError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># If the failure is an expected non-2xx response for this call,</span>
+            <span class="c1"># log it at DEBUG instead of ERROR so it doesn&#39;t pollute the logs.</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">silent_status_codes</span> <span class="ow">and</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">silent_status_codes</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;QRS request returned expected </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                             <span class="n">status</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;QRS request failed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;QRS request failed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+
+    <span class="c1"># ---------------------------------------------------------------------------------------------------------------- #</span>
+    <span class="c1"># Generic HTTP methods                                                                                             #</span>
+    <span class="c1"># ---------------------------------------------------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="QRSClient.get">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.get">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">silent_status_codes</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a GET request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            params (dict, optional): Query parameters as key-value pairs.</span>
+<span class="sd">            headers (dict, optional): Additional header parameters.</span>
+<span class="sd">            silent_status_codes (set, optional): HTTP status codes that are</span>
+<span class="sd">                expected for this call and should be logged at DEBUG instead</span>
+<span class="sd">                of ERROR when they occur (see _request for details).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                                 <span class="n">silent_status_codes</span><span class="o">=</span><span class="n">silent_status_codes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.post">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.post">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">silent_status_codes</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a POST request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            params (dict, optional): Query parameters as key-value pairs.</span>
+<span class="sd">            headers (dict, optional): Additional header parameters.</span>
+<span class="sd">            data (dict or str, optional): The JSON payload to include in the request body.</span>
+<span class="sd">            silent_status_codes (set, optional): HTTP status codes that are</span>
+<span class="sd">                expected for this call and should be logged at DEBUG instead</span>
+<span class="sd">                of ERROR when they occur (see _request for details).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                                 <span class="n">silent_status_codes</span><span class="o">=</span><span class="n">silent_status_codes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.put">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.put">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">silent_status_codes</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a PUT request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            params (dict, optional): Query parameters as key-value pairs.</span>
+<span class="sd">            headers (dict, optional):</span>
+<span class="sd">            data:</span>
+<span class="sd">            payload:</span>
+<span class="sd">            silent_status_codes (set, optional): HTTP status codes that are</span>
+<span class="sd">                expected for this call and should be logged at DEBUG instead</span>
+<span class="sd">                of ERROR when they occur (see _request for details).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                                 <span class="n">silent_status_codes</span><span class="o">=</span><span class="n">silent_status_codes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.delete">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.delete">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">silent_status_codes</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a DELETE request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            endpoint (str): The API endpoint to call.</span>
+<span class="sd">            params (dict, optional): Query parameters as key-value pairs.</span>
+<span class="sd">            silent_status_codes (set, optional): HTTP status codes that are</span>
+<span class="sd">                expected for this call and should be logged at DEBUG instead</span>
+<span class="sd">                of ERROR when they occur (see _request for details).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{},</span>
+                                 <span class="n">silent_status_codes</span><span class="o">=</span><span class="n">silent_status_codes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+
+
+
+    <span class="c1"># ---------------------------------------------------------------------------------------------------------------- #</span>
+    <span class="c1"># Server-side enum lookups                                                                                         #</span>
+    <span class="c1"># ---------------------------------------------------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="QRSClient.get_enum">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.get_enum">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_enum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the list of values for the enum that is used at a given</span>
+<span class="sd">        Qlik Sense schema path.</span>
+
+<span class="sd">        Each Qlik object property whose type is an enum (e.g.</span>
+<span class="sd">        ExecutionResult.Status, ReloadTask.TaskType, App.AvailabilityStatus)</span>
+<span class="sd">        is associated with exactly one enum definition. This method fetches</span>
+<span class="sd">        the full enum table from /qrs/about/api/enums and looks up the</span>
+<span class="sd">        values for the property identified by the given schema path.</span>
+
+<span class="sd">        The returned list mirrors the raw server format - each entry is a</span>
+<span class="sd">        string of the form &quot;&lt;int&gt;: &lt;name&gt;&quot; (e.g. &quot;7: FinishedSuccess&quot;).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema_path (str): The schema path of the property whose enum</span>
+<span class="sd">                values should be returned (e.g. &quot;ExecutionResult.Status&quot;,</span>
+<span class="sd">                &quot;ReloadTask.TaskType&quot;, &quot;App.AvailabilityStatus&quot;).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]: The list of enum value strings (e.g.</span>
+<span class="sd">                [&quot;0: NeverStarted&quot;, &quot;1: Triggered&quot;, ...]), or None if the</span>
+<span class="sd">                schema path is not associated with any enum on the server.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; client.get_enum(&quot;ExecutionResult.Status&quot;)</span>
+<span class="sd">            [&#39;0: NeverStarted&#39;, &#39;1: Triggered&#39;, ..., &#39;14: DistributionRunning&#39;]</span>
+
+<span class="sd">            &gt;&gt;&gt; client.get_enum(&quot;ReloadTask.TaskType&quot;)</span>
+<span class="sd">            [&#39;0: Reload&#39;, &#39;1: ExternalProgram&#39;, &#39;2: UserSync&#39;,</span>
+<span class="sd">             &#39;3: Distribute&#39;, &#39;4: Preload&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/about/api/enums&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">raw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to fetch enum definitions from &quot;</span>
+                         <span class="s2">&quot;/qrs/about/api/enums.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># The server response is keyed by enum name (e.g. &quot;TaskTypeEnum&quot;);</span>
+        <span class="c1"># we walk all definitions and return the values of the one whose</span>
+        <span class="c1"># &quot;usages&quot; list contains the requested schema path. A single enum</span>
+        <span class="c1"># may be referenced by multiple schema paths (e.g. EventTypeEnum is</span>
+        <span class="c1"># used by CompositeEvent.EventType, IEvent.EventType and</span>
+        <span class="c1"># SchemaEvent.EventType).</span>
+        <span class="k">for</span> <span class="n">definition</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">schema_path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="n">u</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">definition</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;usages&quot;</span><span class="p">,</span> <span class="p">[])]:</span>
+                <span class="k">return</span> <span class="n">definition</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;values&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No enum is defined for schema path </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">. &quot;</span>
+                     <span class="s2">&quot;Use a valid schema path such as &quot;</span>
+                     <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">ExecutionResult.Status</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">schema_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+    <span class="c1"># ---------------------------------------------------------------------------------------------------------------- #</span>
+    <span class="c1"># High-level convenience methods                                                                                   #</span>
+    <span class="c1"># ---------------------------------------------------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="QRSClient.app_get_id">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_get_id">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stream_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resolves an app name to the IDs of all apps with that name.</span>
+
+<span class="sd">        Since several apps in Qlik Sense can share the same name, this method</span>
+<span class="sd">        always returns a list. When stream_name is given, the search is</span>
+<span class="sd">        additionally restricted to apps published to the stream with that</span>
+<span class="sd">        name.</span>
+
+<span class="sd">        The lookup uses the server-side QRS filter on /qrs/app/full, mirroring</span>
+<span class="sd">        the filtering pattern used elsewhere in this client (e.g. app_reload,</span>
+<span class="sd">        app_change_owner).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_name (str): The name of the app(s) to look up.</span>
+<span class="sd">            stream_name (str, optional): If given, only apps published to the</span>
+<span class="sd">                stream with this name are returned. Apps that are not</span>
+<span class="sd">                published to any stream never match a stream filter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[uuid.UUID]: The IDs of all matching apps. An empty list if no</span>
+<span class="sd">                app matches or the request fails.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; client.app_get_id(&quot;Sales Dashboard&quot;)</span>
+<span class="sd">            [UUID(&#39;12345678-1234-1234-1234-1234567890ab&#39;)]</span>
+
+<span class="sd">            &gt;&gt;&gt; client.app_get_id(&quot;Sales Dashboard&quot;, stream_name=&quot;Everyone&quot;)</span>
+<span class="sd">            [UUID(&#39;12345678-1234-1234-1234-1234567890ab&#39;)]</span>
+
+<span class="sd">            &gt;&gt;&gt; client.app_get_id(&quot;Does not exist&quot;)</span>
+<span class="sd">            []</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Build the server-side filter. When a stream name is given, restrict</span>
+        <span class="c1"># the search to apps published to that stream.</span>
+        <span class="k">if</span> <span class="n">stream_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_filter</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;name eq &#39;</span><span class="si">{</span><span class="n">app_name</span><span class="si">}</span><span class="s2">&#39; and stream.name eq &#39;</span><span class="si">{</span><span class="n">stream_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_filter</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;name eq &#39;</span><span class="si">{</span><span class="n">app_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+
+        <span class="n">apps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/app/full&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="n">_filter</span><span class="p">})</span>
+
+        <span class="c1"># self.get returns None on a request error; treat it like &quot;no matches&quot;</span>
+        <span class="c1"># so the return type stays a stable list.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">apps</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">stream_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No app named </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> found in stream </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">,</span>
+                               <span class="n">app_name</span><span class="p">,</span> <span class="n">stream_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No app named </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> found.&quot;</span><span class="p">,</span> <span class="n">app_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">(</span><span class="n">app</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">apps</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.stream_get_id">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.stream_get_id">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stream_get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resolves a stream name to the IDs of all streams with that name.</span>
+
+<span class="sd">        The output format matches app_get_id: this method always returns a</span>
+<span class="sd">        list of uuid.UUID. Stream names are normally unique in Qlik Sense,</span>
+<span class="sd">        but a list is used for a consistent return type and to cover the</span>
+<span class="sd">        theoretical case of duplicate names.</span>
+
+<span class="sd">        The lookup uses the server-side QRS filter on /qrs/stream/full,</span>
+<span class="sd">        mirroring app_get_id.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            stream_name (str): The name of the stream(s) to look up.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[uuid.UUID]: The IDs of all matching streams. An empty list</span>
+<span class="sd">                if no stream matches or the request fails.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; client.stream_get_id(&quot;Everyone&quot;)</span>
+<span class="sd">            [UUID(&#39;12345678-1234-1234-1234-1234567890ab&#39;)]</span>
+
+<span class="sd">            &gt;&gt;&gt; client.stream_get_id(&quot;Does not exist&quot;)</span>
+<span class="sd">            []</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_filter</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;name eq &#39;</span><span class="si">{</span><span class="n">stream_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+
+        <span class="n">streams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/stream/full&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="n">_filter</span><span class="p">})</span>
+
+        <span class="c1"># self.get returns None on a request error; treat it like &quot;no matches&quot;</span>
+        <span class="c1"># so the return type stays a stable list.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">streams</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No stream named </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> found.&quot;</span><span class="p">,</span> <span class="n">stream_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">(</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="n">streams</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.app_get_custom_properties">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_get_custom_properties">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_get_custom_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports the custom properties of certain app as JSON.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_id (UUID): The ID of the app.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: JSON response as a list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">custom_properties</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;customProperties&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">custom_properties</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.app_set_custom_properties">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_set_custom_properties">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_set_custom_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">custom_properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inserts custom properties into an app.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_id (UUID): The ID of the app.</span>
+<span class="sd">            custom_properties (dict): Custom property with name and values to be inserted. The values have a &#39;list&#39; as data type.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: JSON response as a list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get app JSON structure</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Create a list with custom properties, which were assigned to the app</span>
+        <span class="n">app_cps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">app_cp</span> <span class="ow">in</span> <span class="n">app</span><span class="p">[</span><span class="s2">&quot;customProperties&quot;</span><span class="p">]:</span>
+            <span class="n">app_cps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">app_cp</span><span class="p">[</span><span class="s2">&quot;definition&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">app_cp</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">custom_properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="c1"># Create filter string</span>
+                <span class="n">_filter</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;objectTypes eq &#39;App&#39; and name eq &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; and choiceValues eq &#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">}</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Get the custom property definition</span>
+                    <span class="n">cp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/custompropertydefinition/full&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">_filter</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Custom property name or value you try to import does not exist in Qlik Sense! &quot;</span>
+                                 <span class="s2">&quot;You should create it first in the QMC.: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="c1"># Get ID of the custom property</span>
+                <span class="n">def_id</span> <span class="o">=</span> <span class="n">cp</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                <span class="c1"># Build custom property definition structure</span>
+                <span class="n">custom_property_definition_condensed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">custom_property_definition_condensed</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">def_id</span><span class="p">)</span>
+                <span class="c1"># Build custom property structure</span>
+                <span class="n">custom_property_value</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">custom_property_value</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">definition</span><span class="o">=</span><span class="n">custom_property_definition_condensed</span><span class="p">)</span>
+                <span class="c1"># Check if a custom property was assigned to the app</span>
+                <span class="k">if</span> <span class="n">custom_property_value</span><span class="p">[</span><span class="s2">&quot;definition&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">custom_property_value</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">app_cps</span><span class="p">:</span>
+                    <span class="c1"># Insert custom property to the app</span>
+                    <span class="n">app</span><span class="p">[</span><span class="s2">&quot;customProperties&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_property_value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">app</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.app_get_tags">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_get_tags">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_get_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports the tags of certain app as JSON.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_id (UUID): The ID of the app.</span>
+<span class="sd">            tags (list): List with tags to be imported.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: JSON response as a list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">tags</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.app_set_tags">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_set_tags">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_set_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inserts tags into an app.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_id (UUID): The ID of the app.</span>
+<span class="sd">            tags (list): The tags of the app.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: JSON response as a list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get app JSON structure</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="c1"># Create filter string</span>
+            <span class="n">_filter</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;name eq &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Get the custom property definition</span>
+                <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/tag/full&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">_filter</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The tag you try to import does not exist in Qlik Sense! &quot;</span>
+                             <span class="s2">&quot;You should create it first in the QMC.: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1"># Get ID of the tag</span>
+            <span class="n">def_id</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+            <span class="c1"># Build tag definition structure</span>
+            <span class="n">tag_condensed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">tag_condensed</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">def_id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="c1"># Insert custom property to the app</span>
+            <span class="n">app</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag_condensed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">app</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.app_get_owner">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_get_owner">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_get_owner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports the owner of certain app as JSON.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_id (UUID): The ID of the app.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: JSON response as a dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">owner</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;owner&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">owner</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.app_change_owner">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_change_owner">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_change_owner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">user_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Changes the owner of certain app.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_id (UUID): The ID of the app.</span>
+<span class="sd">            user_directory (str): The user directory of the new owner.</span>
+<span class="sd">            user_id (str): The user id of the new owner.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: JSON response as a dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create filter string</span>
+        <span class="n">_filter</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;userDirectory eq &#39;</span><span class="si">{</span><span class="n">user_directory</span><span class="si">}</span><span class="s2">&#39; and userId eq &#39;</span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">}</span>
+        <span class="c1"># Get the new owner</span>
+        <span class="n">owner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/user&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">_filter</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Get app JSON structure</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Replace the old owner with the new owner in the app JSON structure</span>
+        <span class="n">app</span><span class="p">[</span><span class="s2">&quot;owner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">owner</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">app</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.app_export">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_export">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">skip_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports an app in a two-step process using POST and GET methods.</span>
+
+<span class="sd">        Step 1: POST to /qrs/app/{id}/export/{token} to trigger the export.</span>
+<span class="sd">                The API returns JSON with a &#39;downloadPath&#39; field.</span>
+<span class="sd">        Step 2: GET the downloadPath to download the binary .qvf file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_id (UUID): The ID of the app to be exported.</span>
+<span class="sd">            file_path (str): The directory path where the exported app should be stored.</span>
+<span class="sd">            file_name (str, optional): File name for the exported app (e.g., &quot;MyApp.qvf&quot;). Falls kein Wert übergeben</span>
+<span class="sd">            wurde, wird der ursprüngliche Name der Datei genommen.</span>
+<span class="sd">            skip_data:</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Success message with file name and path, or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">################################################################################################################</span>
+        <span class="c1"># Step 1: Trigger the export on the Sense Enterprise Server.</span>
+        <span class="c1">################################################################################################################</span>
+        <span class="n">export_token</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/qrs/app/</span><span class="si">{0}</span><span class="s1">/export/</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">app_id</span><span class="p">,</span> <span class="n">export_token</span><span class="p">)</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;skipData&quot;</span><span class="p">:</span> <span class="n">skip_data</span><span class="p">}</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">query</span><span class="p">)</span>
+        <span class="c1"># data = self._request(method=&quot;GET&quot;, endpoint=path, params=query, headers={})</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Export request failed for app </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">app_id</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1">################################################################################################################</span>
+        <span class="c1"># Step 2: Download the .qvf file.</span>
+        <span class="c1">################################################################################################################</span>
+        <span class="n">download_path</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;downloadPath&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">download_path</span><span class="p">)</span>
+        <span class="n">path_part</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">path</span>
+        <span class="n">query_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pair</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">parsed</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;&amp;&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;=&#39;</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">)</span> <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">query</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Extract file name</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path_part</span><span class="p">)</span>
+            <span class="c1"># Decode URL-Encoding</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+        <span class="c1"># Complete header for the download request</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/vnd.qlik.sense.app&quot;</span><span class="p">}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">path_part</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">query_dict</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">8192</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+                        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;Application: </span><span class="si">{0}</span><span class="s1"> written to </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Download error: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.app_upload">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_upload">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keep_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">exclude_connections</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a POST request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_name (str): The name of the app after upload.</span>
+<span class="sd">            file_name (str): The path to the file.</span>
+<span class="sd">            exclude_connections (bool, optional): If set to true and the uploaded .qvf file contains any data connections, they will not be imported to the system. The default value is false.</span>
+<span class="sd">            keep_data (bool, optional): If set to false and the uploaded .qvf file contains app data, the data will be silently discarded. The default value is true.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/vnd.qlik.sense.app&quot;</span><span class="p">}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/app/upload&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">app_name</span><span class="p">,</span> <span class="s2">&quot;keepdata&quot;</span><span class="p">:</span> <span class="n">keep_data</span><span class="p">,</span> <span class="s2">&quot;excludeconnections&quot;</span><span class="p">:</span> <span class="n">exclude_connections</span><span class="p">},</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.app_upload_replace">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_upload_replace">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_upload_replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_app_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keep_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes a POST request to the QRS API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_app_id (UUID): The ID of the app to be replaced.</span>
+<span class="sd">            file_name (str): The path to the file.</span>
+<span class="sd">            keep_data (bool, optional): If set to false and the uploaded .qvf file contains app data, the data will be silently discarded. The default value is true.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response as a dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/vnd.qlik.sense.app&quot;</span><span class="p">}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/app/upload/replace&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;targetappid&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_app_id</span><span class="p">),</span> <span class="s2">&quot;keepdata&quot;</span><span class="p">:</span> <span class="n">keep_data</span><span class="p">},</span>
+                             <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.app_reload">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.app_reload">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app_reload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">poll_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Triggers a reload, identified by either a reload task ID or an app</span>
+<span class="sd">        ID, and waits for it to complete. Mimics the QMC&#39;s &quot;Reload now&quot;</span>
+<span class="sd">        functionality.</span>
+
+<span class="sd">        The given ID is resolved in two steps:</span>
+<span class="sd">            1. The method first checks whether a reload task with that ID</span>
+<span class="sd">               exists. If so, the task is reused as-is (the method does</span>
+<span class="sd">               not create or modify anything). Only reload tasks (taskType</span>
+<span class="sd">               0) are accepted; tasks of other types are rejected.</span>
+<span class="sd">            2. If no reload task with that ID exists, the ID is treated as</span>
+<span class="sd">               an app ID. The method then looks for an existing reload</span>
+<span class="sd">               task named &quot;Manually triggered reload of &lt;app_name&gt;&quot; for</span>
+<span class="sd">               that app, creating one via reloadtask_create() if needed</span>
+<span class="sd">               (with no schema events, only manually triggerable).</span>
+
+<span class="sd">        Once a reload task has been resolved, the task is started via</span>
+<span class="sd">        POST /qrs/task/{id}/start/synchronous. The server returns an</span>
+<span class="sd">        execution session GUID. An empty GUID (00000000-...) means the</span>
+<span class="sd">        task could not be started (disabled, no scheduler available, app</span>
+<span class="sd">        not available).</span>
+
+<span class="sd">        The execution session is then polled via</span>
+<span class="sd">        GET /qrs/executionsession/{id} until it returns 404 Not Found -</span>
+<span class="sd">        per Qlik&#39;s documentation this indicates the task has finished and</span>
+<span class="sd">        the execution session entity has been deleted from the database.</span>
+
+<span class="sd">        Finally, the execution result is fetched via</span>
+<span class="sd">        GET /qrs/executionresult?filter=executionID eq &lt;session_id&gt;</span>
+<span class="sd">        to determine the final status, duration and details.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            id (UUID): Either the ID of a reload task to start, or the ID</span>
+<span class="sd">                of an app to reload (resolved in that order).</span>
+<span class="sd">            poll_interval (float, optional): Interval in seconds between</span>
+<span class="sd">                status checks. Default value is 5.0.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A result dictionary with the following keys:</span>
+<span class="sd">                - &quot;success&quot; (bool): True if the reload completed successfully</span>
+<span class="sd">                  (status FinishedSuccess), False otherwise.</span>
+<span class="sd">                - &quot;task&quot; (dict): The reload task object that was used.</span>
+<span class="sd">                Returns None if the ID could not be resolved to either a</span>
+<span class="sd">                reload task or an app, the task could not be created or</span>
+<span class="sd">                started, or no execution result was found afterwards.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Rebind to a local name so we don&#39;t shadow Python&#39;s built-in id()</span>
+        <span class="c1"># inside the method body.</span>
+        <span class="n">_id</span> <span class="o">=</span> <span class="nb">id</span>
+
+        <span class="n">_EMPTY_GUID</span> <span class="o">=</span> <span class="s2">&quot;00000000-0000-0000-0000-000000000000&quot;</span>
+        <span class="n">_TASK_TYPE_RELOAD</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># ------------------------------------------------------------------</span>
+        <span class="c1"># Resolve the given ID to a reload task</span>
+        <span class="c1"># ------------------------------------------------------------------</span>
+
+        <span class="c1"># Step 1: try to interpret the ID as a reload task ID.</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/reloadtask/full&quot;</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;id eq </span><span class="si">{</span><span class="n">_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">tasks</span><span class="p">:</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using existing reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> (ID: </span><span class="si">%s</span><span class="s2">).&quot;</span><span class="p">,</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">_id</span><span class="p">),</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Step 2: not a task ID - try to interpret it as an app ID.</span>
+            <span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/app/</span><span class="si">{</span><span class="n">_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">app</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No reload task or app with ID </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> exists!&quot;</span><span class="p">,</span> <span class="n">_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="n">app_id</span> <span class="o">=</span> <span class="n">_id</span>
+            <span class="n">app_name</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">app_id</span><span class="p">))</span>
+            <span class="n">task_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Manually triggered reload of </span><span class="si">{</span><span class="n">app_name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="c1"># Look for an existing reload task with the conventional name</span>
+            <span class="c1"># for this app</span>
+            <span class="n">existing_tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/reloadtask/full&quot;</span><span class="p">,</span>
+                <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;app.id eq </span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2"> and name eq &#39;</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">},</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">existing_tasks</span><span class="p">:</span>
+                <span class="n">task</span> <span class="o">=</span> <span class="n">existing_tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reusing existing reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> (ID: </span><span class="si">%s</span><span class="s2">) &quot;</span>
+                            <span class="s2">&quot;for app </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">,</span>
+                            <span class="n">task_name</span><span class="p">,</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">app_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> for app </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">,</span>
+                            <span class="n">task_name</span><span class="p">,</span> <span class="n">app_name</span><span class="p">)</span>
+                <span class="n">created_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reloadtask_create</span><span class="p">(</span>
+                    <span class="n">app_id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">app_id</span><span class="p">),</span>
+                    <span class="n">task_name</span><span class="o">=</span><span class="n">task_name</span><span class="p">,</span>
+                    <span class="n">task_type</span><span class="o">=</span><span class="n">_TASK_TYPE_RELOAD</span><span class="p">,</span>
+                    <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">is_manually_triggered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">created_task</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to create reload task for app </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">!&quot;</span><span class="p">,</span>
+                                 <span class="n">app_name</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+
+                <span class="c1"># Re-fetch the new task by name to get its ID</span>
+                <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/reloadtask/full&quot;</span><span class="p">,</span>
+                    <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;app.id eq </span><span class="si">{</span><span class="n">app_id</span><span class="si">}</span><span class="s2"> and name eq &#39;</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">},</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># ------------------------------------------------------------------</span>
+        <span class="c1"># Start the task and wait for the execution session to finish</span>
+        <span class="c1"># ------------------------------------------------------------------</span>
+
+        <span class="n">task_id</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+        <span class="n">task_name</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">))</span>
+
+        <span class="c1"># Start the task synchronously - the server returns an execution</span>
+        <span class="c1"># session GUID as soon as the task has been picked up by the scheduler.</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> (ID: </span><span class="si">%s</span><span class="s2">).&quot;</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span>
+        <span class="n">start_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/task/</span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2">/start/synchronous&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_response</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to start reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">!&quot;</span><span class="p">,</span> <span class="n">task_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Get the session id</span>
+        <span class="n">session_id</span> <span class="o">=</span> <span class="n">start_response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">session_id</span> <span class="ow">or</span> <span class="n">session_id</span> <span class="o">==</span> <span class="n">_EMPTY_GUID</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> could not be started: the server &quot;</span>
+                         <span class="s2">&quot;returned an empty session ID. The task may be disabled, &quot;</span>
+                         <span class="s2">&quot;no scheduler is available or the app is unavailable.&quot;</span><span class="p">,</span>
+                         <span class="n">task_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> started with execution session ID </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span>
+                    <span class="n">task_name</span><span class="p">,</span> <span class="n">session_id</span><span class="p">)</span>
+
+        <span class="c1"># Poll GET /qrs/executionsession/{id} until it returns 404 Not Found.</span>
+        <span class="c1"># Per Qlik&#39;s documentation, 404 indicates the task has finished and</span>
+        <span class="c1"># the execution session entity has been deleted from the database.</span>
+        <span class="c1"># self.get returns None on any non-2xx response (including 404), so</span>
+        <span class="c1"># we treat a None response as &quot;task finished&quot;.</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll_interval</span><span class="p">)</span>
+
+            <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/qrs/executionsession/</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                               <span class="n">silent_status_codes</span><span class="o">=</span><span class="p">{</span><span class="mi">404</span><span class="p">})</span>
+            <span class="k">if</span> <span class="n">session</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># 404 from the server: task is finished. If the very first poll</span>
+                <span class="c1"># already returns None, the task simply finished before we got</span>
+                <span class="c1"># a chance to observe it - this is normal for very short reloads.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Execution session </span><span class="si">%s</span><span class="s2"> no longer exists - reload &quot;</span>
+                            <span class="s2">&quot;task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> has finished.&quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">task_name</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> still in progress (elapsed: </span><span class="si">%.0f</span><span class="s2">s)&quot;</span><span class="p">,</span>
+                         <span class="n">task_name</span><span class="p">,</span> <span class="n">elapsed</span><span class="p">)</span>
+
+        <span class="c1"># Fetch the final execution result for this session. With task retries</span>
+        <span class="c1"># configured there can be more than one result - we take the newest.</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/executionresult/full&quot;</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;executionID eq </span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;orderby&quot;</span><span class="p">:</span> <span class="s2">&quot;startTime desc&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> finished but no execution result &quot;</span>
+                         <span class="s2">&quot;was found for session </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">session_id</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">latest</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">latest</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">)</span>
+        <span class="c1"># success = status == self.get_enum(&quot;TaskExecutionStatus&quot;, &quot;FinishedSuccess&quot;)</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">7</span>
+
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> finished successfully &quot;</span>
+                        <span class="s2">&quot;(duration: </span><span class="si">%s</span><span class="s2"> ms).&quot;</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">latest</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Reload task </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> finished with status </span><span class="si">%s</span><span class="s2"> &quot;</span>
+                         <span class="s2">&quot;(duration: </span><span class="si">%s</span><span class="s2"> ms).&quot;</span><span class="p">,</span>
+                         <span class="n">task_name</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">latest</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="n">success</span><span class="p">,</span>
+            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="QRSClient.reloadtask_create">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.reloadtask_create">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reloadtask_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">custom_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">created_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">modified_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">modified_by_user_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">schema_events</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">composite_events</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">privileges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">task_session_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_manually_triggered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">operational</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_partial_reload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">time_to_live</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">preload_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a reload task for a specified app.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            app_id (str): The ID of the app for which the task is created.</span>
+<span class="sd">            task_name (str): The name of the reload task to create.</span>
+<span class="sd">            custom_properties (dict, optional): Dictionary of custom property IDs and their values.</span>
+<span class="sd">            tags (list, optional): List of tag IDs to associate with the task.</span>
+<span class="sd">            schema_events (list, optional): List of schema events to schedule the task.</span>
+<span class="sd">            composite_events (list, optional): List of composite events to schedule the task.</span>
+<span class="sd">            schema_path (str, optional): Schema path.</span>
+<span class="sd">            privileges (list, optional): Privileges.</span>
+<span class="sd">            task_type (int, optional): Task type. Default value is 0.</span>
+<span class="sd">            enabled (bool, optional): True, if the task is active. Default value is True.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response from the API or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># # Initialize mutable default arguments</span>
+        <span class="c1"># if privileges is None:</span>
+        <span class="c1">#     privileges = []</span>
+
+        <span class="c1"># Create app reference</span>
+        <span class="n">app_condensed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">app_condensed</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">app_id</span><span class="p">)</span>
+
+        <span class="c1"># Prepare custom properties</span>
+        <span class="n">custom_property_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">custom_properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">custom_property_id</span><span class="p">,</span> <span class="n">custom_property_values</span> <span class="ow">in</span> <span class="n">custom_properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">custom_property_definition_condensed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">custom_property_definition_condensed</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">custom_property_id</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">custom_property_values</span><span class="p">:</span>
+                    <span class="n">custom_property_value</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">custom_property_value</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+                                                                         <span class="n">definition</span><span class="o">=</span><span class="n">custom_property_definition_condensed</span><span class="p">)</span>
+                    <span class="n">custom_property_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_property_value</span><span class="p">)</span>
+
+        <span class="c1"># Prepare tags</span>
+        <span class="n">tag_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+                <span class="n">tag_condensed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">tag_condensed</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
+                <span class="n">tag_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag_condensed</span><span class="p">)</span>
+
+        <span class="c1"># Construct reload task</span>
+        <span class="n">reload_task</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">reload_task</span><span class="p">(</span><span class="n">custom_properties</span><span class="o">=</span><span class="n">custom_property_list</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">task_name</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tag_list</span><span class="p">,</span>
+                                         <span class="n">app</span><span class="o">=</span><span class="n">app_condensed</span><span class="p">,</span> <span class="n">created_date</span><span class="o">=</span><span class="n">created_date</span><span class="p">,</span> <span class="n">modified_date</span><span class="o">=</span><span class="n">modified_date</span><span class="p">,</span>
+                                         <span class="n">modified_by_user_name</span><span class="o">=</span><span class="n">modified_by_user_name</span><span class="p">,</span> <span class="n">schema_path</span><span class="o">=</span><span class="n">schema_path</span><span class="p">,</span>
+                                         <span class="n">privileges</span><span class="o">=</span><span class="n">privileges</span><span class="p">,</span> <span class="n">task_type</span><span class="o">=</span><span class="n">task_type</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="n">enabled</span><span class="p">,</span>
+                                         <span class="n">task_session_timeout</span><span class="o">=</span><span class="n">task_session_timeout</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
+                                         <span class="n">is_manually_triggered</span><span class="o">=</span><span class="n">is_manually_triggered</span><span class="p">,</span> <span class="n">operational</span><span class="o">=</span><span class="n">operational</span><span class="p">,</span>
+                                         <span class="n">is_partial_reload</span><span class="o">=</span><span class="n">is_partial_reload</span><span class="p">,</span> <span class="n">time_to_live</span><span class="o">=</span><span class="n">time_to_live</span><span class="p">,</span>
+                                         <span class="n">preload_nodes</span><span class="o">=</span><span class="n">preload_nodes</span><span class="p">)</span>
+
+        <span class="c1"># Construct reload task bundle</span>
+        <span class="n">reload_task_bundle</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">reload_task_bundle</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">reload_task</span><span class="p">,</span> <span class="n">composite_events</span><span class="o">=</span><span class="n">composite_events</span><span class="p">,</span>
+                                                       <span class="n">schema_events</span><span class="o">=</span><span class="n">schema_events</span><span class="p">)</span>
+
+        <span class="c1"># Serialize payload to JSON</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">reload_task_bundle</span><span class="p">)</span>
+
+        <span class="c1"># Execute API call</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/reloadtask/create&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+
+    <span class="c1"># def create_tag(self, name: str):</span>
+    <span class="c1">#</span>
+    <span class="c1">#     tags = self.get(endpoint=&quot;/qrs/tag&quot;)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if not any(item[&quot;name&quot;].lower() == name.lower() for item in tags):</span>
+    <span class="c1">#         # Construct tag structure</span>
+    <span class="c1">#         tag = models.tag(name=name)</span>
+    <span class="c1">#         # Serialize payload to JSON</span>
+    <span class="c1">#         payload = json.dumps(tag)</span>
+    <span class="c1">#         # Execute API call</span>
+    <span class="c1">#         return self.post(endpoint=&quot;/qrs/tag&quot;, data=payload)</span>
+    <span class="c1">#     logger.error(&quot;The tag \&quot;%s\&quot; already exists!&quot;, name)</span>
+    <span class="c1">#     return None</span>
+
+<div class="viewcode-block" id="QRSClient.create_tag">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.create_tag">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a single tag via the Qlik Repository Service.</span>
+
+<span class="sd">        Retrieves all existing tags first and checks case-insensitively whether</span>
+<span class="sd">        a tag with the given name already exists. If not, a new tag is created</span>
+<span class="sd">        via the POST /qrs/tag endpoint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the tag to create. Comparison with existing</span>
+<span class="sd">                tags is case-insensitive.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response from the API containing the created tag, or</span>
+<span class="sd">                None if a tag with the given name already exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Call existing tags</span>
+        <span class="n">existing_tags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/tag&quot;</span><span class="p">)</span>
+        <span class="c1"># Get names of existing tags</span>
+        <span class="n">existing_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">existing_tags</span><span class="p">}</span>
+
+        <span class="c1"># Check, if a tag already exists</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">existing_names</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The tag </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> already exists!&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="c1"># Construct tag structure</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1"># Serialize payload to JSON</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+        <span class="c1"># Execute API call to /tag endpoint</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/tag&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.create_tags">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.create_tags">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates multiple tags in a single API call.</span>
+
+<span class="sd">        Uses the bulk endpoint POST /qrs/tag/many to create several tags at once.</span>
+<span class="sd">        Before sending the request, both already existing tags and duplicates</span>
+<span class="sd">        within the input list are filtered out (case-insensitive). If no tags</span>
+<span class="sd">        remain after filtering, no request is sent.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            names (list[str]): List of tag names to create. Already existing</span>
+<span class="sd">                names and duplicates within the list are skipped and logged</span>
+<span class="sd">                as errors.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict]: JSON response from the API containing the created tags,</span>
+<span class="sd">                or None if no new tags remain to be created after filtering.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Call existing tags</span>
+        <span class="n">existing_tags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/tag&quot;</span><span class="p">)</span>
+        <span class="c1"># Get names of existing tags</span>
+        <span class="n">existing_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">existing_tags</span><span class="p">}</span>
+
+        <span class="c1"># Filter new tags and remove duplicates from input</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">new_tags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">existing_names</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The tag </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> already exists!&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The tag </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> is duplicated in the input!&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">new_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_tags</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No new tags to create.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Serialize payload to JSON</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">new_tags</span><span class="p">)</span>
+        <span class="c1"># Execute API call to /tag/many endpoint</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/tag/many&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.create_custom_property">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.create_custom_property">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_custom_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Text&quot;</span><span class="p">,</span>
+                               <span class="n">choice_values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">object_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a single custom property definition via the Qlik Repository Service.</span>
+
+<span class="sd">        Retrieves all existing custom property definitions first and checks</span>
+<span class="sd">        case-insensitively whether a definition with the given name already</span>
+<span class="sd">        exists. If not, a new custom property definition is created via the</span>
+<span class="sd">        POST /qrs/custompropertydefinition endpoint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the custom property definition to create.</span>
+<span class="sd">                Comparison with existing definitions is case-insensitive.</span>
+<span class="sd">            value_type (str, optional): The type of value the property accepts</span>
+<span class="sd">                (e.g. &quot;Text&quot;). Default value is &quot;Text&quot;.</span>
+<span class="sd">            choice_values (list[str], optional): Predefined choice values for</span>
+<span class="sd">                the property. Only relevant when the property should be</span>
+<span class="sd">                restricted to a fixed set of values.</span>
+<span class="sd">            object_types (list[str], optional): List of object types the</span>
+<span class="sd">                property can be applied to (e.g. [&quot;App&quot;, &quot;Stream&quot;]).</span>
+<span class="sd">            description (str, optional): A description of the custom property</span>
+<span class="sd">                definition.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON response from the API containing the created custom</span>
+<span class="sd">                property definition, or None if a definition with the given</span>
+<span class="sd">                name already exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Retrieve existing custom property definitions</span>
+        <span class="n">existing_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/custompropertydefinition&quot;</span><span class="p">)</span>
+        <span class="n">existing_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">existing_properties</span><span class="p">}</span>
+
+        <span class="c1"># Existence check</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">existing_names</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The custom property </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> already exists!&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Construct custom property definition structure</span>
+        <span class="n">custom_property</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">custom_property_definition</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">value_type</span><span class="o">=</span><span class="n">value_type</span><span class="p">,</span>
+            <span class="n">choice_values</span><span class="o">=</span><span class="n">choice_values</span><span class="p">,</span>
+            <span class="n">object_types</span><span class="o">=</span><span class="n">object_types</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Serialize payload to JSON</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">custom_property</span><span class="p">)</span>
+        <span class="c1"># Execute API call</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/custompropertydefinition&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QRSClient.create_custom_properties">
+<a class="viewcode-back" href="../../client.html#qrs_api_client.client.QRSClient.create_custom_properties">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_custom_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates multiple custom property definitions in a single API call.</span>
+
+<span class="sd">        Uses the bulk endpoint POST /qrs/custompropertydefinition/many to create</span>
+<span class="sd">        several custom property definitions at once. Each entry in the input</span>
+<span class="sd">        list is expected to be a custom property definition dict as produced by</span>
+<span class="sd">        models.custom_property_definition(). Already existing definitions and</span>
+<span class="sd">        duplicates within the input list are filtered out (case-insensitive,</span>
+<span class="sd">        by name). If no definitions remain after filtering, no request is sent.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            properties (list[dict]): List of custom property definition dicts</span>
+<span class="sd">                (e.g. produced by models.custom_property_definition()) to be</span>
+<span class="sd">                created. Already existing names and duplicates within the list</span>
+<span class="sd">                are skipped and logged as errors.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict]: JSON response from the API containing the created</span>
+<span class="sd">                custom property definitions, or None if no new definitions</span>
+<span class="sd">                remain to be created after filtering.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Retrieve existing custom property definitions once</span>
+        <span class="n">existing_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/custompropertydefinition&quot;</span><span class="p">)</span>
+        <span class="n">existing_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">existing_properties</span><span class="p">}</span>
+
+        <span class="c1"># Filter new definitions and remove duplicates within the input</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">new_properties</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Skipping custom property without a name: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="n">key</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">existing_names</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The custom property </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> already exists!&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The custom property </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> is duplicated in the input!&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+            <span class="c1"># Forward the prebuilt definition as-is</span>
+            <span class="n">new_properties</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_properties</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No new custom properties to create.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Serialize payload as JSON array</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">new_properties</span><span class="p">)</span>
+        <span class="c1"># Execute API call to the /many endpoint</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/qrs/custompropertydefinition/many&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Rumen Vasilev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
